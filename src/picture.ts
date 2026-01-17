@@ -35,3 +35,22 @@ export function crop(picture: Picture): [number, number, number, number, number,
     return [sx, sy, sw, sh, dx, dy, dw, dh];
   }
 }
+
+export function hitTest(pictures: Picture[], pos: [number, number]): Picture | null {
+  for (let i = pictures.length - 1; i >= 0; i--) {
+    const picture = pictures[i];
+    const [_sx, _sy, _sw, _sh, dx, dy, dw, dh] = crop(picture);
+    if (pos[0] >= dx && pos[0] <= dx + dw && pos[1] >= dy && pos[1] <= dy + dh) {
+      return picture;
+    }
+  }
+  return null;
+}
+
+export function moveToTop(pictures: Picture[], picture: Picture) {
+  const index = pictures.indexOf(picture);
+  if (index > -1) {
+    pictures.splice(index, 1);
+    pictures.push(picture);
+  }
+}

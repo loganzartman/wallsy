@@ -1,5 +1,5 @@
 import { clearState, loadState, storeState } from './db';
-import { crop } from './picture';
+import { crop, hitTest, moveToTop, type Picture } from './picture';
 import { emptyState, type State } from './state';
 import { emptyView, getMatrix, windowToWorld, type View } from './view';
 
@@ -30,6 +30,31 @@ export async function init({
         emptyState(state);
       })().catch((error) => console.error(error));
     }
+  });
+
+  // handle moving pictures
+  let draggingPicture: Picture | null = null;
+  let dragOffset: [number, number] = [0, 0];
+  document.addEventListener('pointerdown', (e) => {
+    const picture = hitTest(state.pictures, windowToWorld(view, [e.clientX, e.clientY]));
+    if (!picture) {
+      return;
+    }
+    moveToTop(state.pictures, picture);
+    draggingPicture = picture;
+    const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
+    dragOffset = [worldPos[0] - picture.pos[0], worldPos[1] - picture.pos[1]];
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!draggingPicture) {
+      return;
+    }
+    e.preventDefault();
+    const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
+    draggingPicture.pos = [worldPos[0] - dragOffset[0], worldPos[1] - dragOffset[1]];
+  });
+  document.addEventListener('pointerup', (e) => {
+    draggingPicture = null;
   });
 
   // prevent default drag/drop behavior
