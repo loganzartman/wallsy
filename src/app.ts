@@ -1,4 +1,5 @@
 import { clearState, loadState, storeState } from './db';
+import { crop } from './picture';
 import { emptyState, type State } from './state';
 import { emptyView, getMatrix, windowToWorld, type View } from './view';
 
@@ -66,13 +67,11 @@ export async function init({
       const pos: [number, number] = windowToWorld(view, [e.clientX, e.clientY]);
       for (const file of files) {
         const bitmap = await createImageBitmap(file);
-        const ratio = bitmap.width / bitmap.height;
-        const size: [number, number] = [300, 300 / ratio];
+        const size: [number, number] = [14, 11];
         state.pictures.push({
           name: file.name,
           pos: [pos[0] - size[0] / 2, pos[1] - size[1] / 2],
           size,
-          cropRatio: 1,
           blob: file,
           bitmap,
         });
@@ -101,7 +100,7 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
   ctx.save();
   ctx.setTransform(getMatrix(view));
   for (const picture of state.pictures) {
-    ctx.drawImage(picture.bitmap, ...picture.pos, ...picture.size);
+    ctx.drawImage(picture.bitmap, ...crop(picture));
   }
   ctx.restore();
 }

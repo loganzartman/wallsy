@@ -7,7 +7,7 @@ export function emptyView(view?: View): View {
   if (!view) {
     return {
       pan: [0, 0],
-      scale: 1,
+      scale: 20,
     };
   }
   view.pan = [0, 0];
