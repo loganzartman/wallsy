@@ -13,6 +13,7 @@
     "lint:fix": "oxlint --fix && oxfmt --fix"
   },
   "dependencies": {
+    "idb": "^8.0.3",
     "parcel": "^2.16.3"
   },
   "devDependencies": {

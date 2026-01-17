@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      idb:
+        specifier: ^8.0.3
+        version: 8.0.3
       parcel:
         specifier: ^2.16.3
         version: 2.16.3(@swc/helpers@0.5.18)
@@ -698,6 +701,9 @@ packages:
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
+
+  idb@8.0.3:
+    resolution: {integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==}
 
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
@@ -1754,6 +1760,8 @@ snapshots:
       type-fest: 0.20.2
 
   has-flag@4.0.0: {}
+
+  idb@8.0.3: {}
 
   is-extglob@2.1.1: {}
 
