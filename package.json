@@ -1,0 +1,25 @@
+{
+  "name": "wallsy",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "author": "",
+  "source": "src/index.html",
+  "scripts": {
+    "dev": "parcel",
+    "build": "parcel build",
+    "lint": "oxlint && oxfmt",
+    "lint:fix": "oxlint --fix && oxfmt --fix"
+  },
+  "dependencies": {
+    "parcel": "^2.16.3"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.24.0",
+    "oxlint": "^1.39.0"
+  },
+  "browserslist": [
+    "defaults"
+  ]
+}
