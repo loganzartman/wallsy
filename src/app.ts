@@ -1,5 +1,6 @@
 import { clearState, loadState, storeState } from './db';
 import { emptyState, type State } from './state';
+import { emptyView, getMatrix, windowToWorld, type View } from './view';
 
 export async function init({
   canvas,
@@ -11,14 +12,15 @@ export async function init({
   clearButton: HTMLButtonElement;
 }) {
   const state = (await loadState()) ?? emptyState();
+  const view = emptyView();
 
   function frame() {
-    redraw({ canvas, state });
+    redraw({ canvas, state, view });
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  document.addEventListener('resize', () => resize({ canvas, state }));
-  resize({ canvas, state });
+  document.addEventListener('resize', () => resize({ canvas, state, view }));
+  resize({ canvas, state, view });
 
   clearButton.addEventListener('click', () => {
     if (confirm('Really clear everything?')) {
@@ -61,7 +63,7 @@ export async function init({
     dragOverlay.style.opacity = '0';
     const files = Array.from(e.dataTransfer?.files ?? []).filter((file) => file.type.startsWith('image/'));
     (async () => {
-      const pos: [number, number] = [e.clientX, e.clientY];
+      const pos: [number, number] = windowToWorld(view, [e.clientX, e.clientY]);
       for (const file of files) {
         const bitmap = await createImageBitmap(file);
         const ratio = bitmap.width / bitmap.height;
@@ -82,21 +84,22 @@ export async function init({
   });
 }
 
-function resize({ canvas, state }: { canvas: HTMLCanvasElement; state: State }) {
+function resize({ canvas, state, view }: { canvas: HTMLCanvasElement; state: State; view: View }) {
   canvas.width = window.innerWidth * window.devicePixelRatio;
   canvas.height = window.innerHeight * window.devicePixelRatio;
-  redraw({ canvas, state });
+  redraw({ canvas, state, view });
 }
 
-function redraw({ canvas, state }: { canvas: HTMLCanvasElement; state: State }) {
+function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: State; view: View }) {
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     throw new Error('Context not found');
   }
 
-  ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  ctx.save();
+  ctx.setTransform(getMatrix(view));
   for (const picture of state.pictures) {
     ctx.drawImage(picture.bitmap, ...picture.pos, ...picture.size);
   }

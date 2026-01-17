@@ -5,7 +5,11 @@ export type State = {
 };
 
 export function emptyState(state?: State): State {
-  state ??= { pictures: [] };
+  if (!state) {
+    return {
+      pictures: [],
+    };
+  }
   state.pictures = [];
   return state;
 }
