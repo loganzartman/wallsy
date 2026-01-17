@@ -17,9 +17,9 @@ export function emptyView(view?: View): View {
 
 export function getMatrix(view: View): DOMMatrix {
   return new DOMMatrix()
-    .translate(...view.pan)
+    .scale(window.devicePixelRatio)
     .scale(view.scale)
-    .scale(window.devicePixelRatio);
+    .translate(...view.pan);
 }
 
 export function windowToWorld(view: View, point: [number, number]): [number, number] {
@@ -27,7 +27,6 @@ export function windowToWorld(view: View, point: [number, number]): [number, num
   const result = matrix.transformPoint({
     x: point[0] * window.devicePixelRatio,
     y: point[1] * window.devicePixelRatio,
-    w: 1,
   });
   return [result.x, result.y];
 }

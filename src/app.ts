@@ -70,7 +70,7 @@ export async function init({
         const size: [number, number] = [14, 11];
         state.pictures.push({
           name: file.name,
-          pos: [pos[0] - size[0] / 2, pos[1] - size[1] / 2],
+          pos: [pos[0], pos[1]],
           size,
           blob: file,
           bitmap,
