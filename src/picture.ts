@@ -46,11 +46,3 @@ export function hitTest(pictures: Picture[], pos: [number, number]): Picture | n
   }
   return null;
 }
-
-export function moveToTop(pictures: Picture[], picture: Picture) {
-  const index = pictures.indexOf(picture);
-  if (index > -1) {
-    pictures.splice(index, 1);
-    pictures.push(picture);
-  }
-}

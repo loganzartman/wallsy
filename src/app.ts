@@ -1,7 +1,9 @@
 import { clearState, loadState, storeState } from './db';
-import { crop, hitTest, moveToTop, type Picture } from './picture';
-import { emptyState, type State } from './state';
+import { crop, hitTest, type Picture } from './picture';
+import { emptyState, moveToTop, type State } from './state';
 import { emptyView, getMatrix, windowToWorld, type View } from './view';
+
+let dirty = true;
 
 export async function init({
   canvas,
@@ -28,6 +30,7 @@ export async function init({
       (async () => {
         await clearState();
         emptyState(state);
+        dirty = true;
       })().catch((error) => console.error(error));
     }
   });
@@ -40,10 +43,12 @@ export async function init({
     if (!picture) {
       return;
     }
-    moveToTop(state.pictures, picture);
+    moveToTop(state, picture);
     draggingPicture = picture;
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
     dragOffset = [worldPos[0] - picture.pos[0], worldPos[1] - picture.pos[1]];
+    dirty = true;
+    redraw({ canvas, state, view });
   });
   document.addEventListener('pointermove', (e) => {
     if (!draggingPicture) {
@@ -52,6 +57,8 @@ export async function init({
     e.preventDefault();
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
     draggingPicture.pos = [worldPos[0] - dragOffset[0], worldPos[1] - dragOffset[1]];
+    dirty = true;
+    redraw({ canvas, state, view });
   });
   document.addEventListener('pointerup', (e) => {
     draggingPicture = null;
@@ -103,6 +110,7 @@ export async function init({
         pos[0] += 16;
         pos[1] += 16;
       }
+      dirty = true;
       await storeState(state);
     })().catch((error) => console.error(error));
   });
@@ -115,6 +123,11 @@ function resize({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
 }
 
 function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: State; view: View }) {
+  if (!dirty) {
+    return;
+  }
+  dirty = false;
+
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     throw new Error('Context not found');
