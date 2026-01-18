@@ -14,7 +14,37 @@ function main() {
     throw new Error('Clear button not found');
   }
 
-  init({ canvas, dragOverlay, clearButton }).catch((error) => console.error(error));
+  const selectedPictureControls = document.getElementById('selected-picture-controls') as HTMLElement | undefined;
+  if (!selectedPictureControls) {
+    throw new Error('Selected picture controls not found');
+  }
+  const selectedPictureWidth = document.getElementById('selected-picture-width') as HTMLInputElement | undefined;
+  if (!selectedPictureWidth) {
+    throw new Error('Selected picture width not found');
+  }
+  const selectedPictureHeight = document.getElementById('selected-picture-height') as HTMLInputElement | undefined;
+  if (!selectedPictureHeight) {
+    throw new Error('Selected picture height not found');
+  }
+  const selectedPictureDelete = document.getElementById('selected-picture-delete') as HTMLButtonElement | undefined;
+  if (!selectedPictureDelete) {
+    throw new Error('Selected picture delete not found');
+  }
+  const selectedPictureClone = document.getElementById('selected-picture-clone') as HTMLButtonElement | undefined;
+  if (!selectedPictureClone) {
+    throw new Error('Selected picture clone not found');
+  }
+
+  init({
+    canvas,
+    dragOverlay,
+    clearButton,
+    selectedPictureControls,
+    selectedPictureWidth,
+    selectedPictureHeight,
+    selectedPictureDelete,
+    selectedPictureClone,
+  }).catch((error) => console.error(error));
 }
 
 main();
