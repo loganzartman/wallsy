@@ -17,6 +17,8 @@ export async function init({
   selectedPictureDelete,
   selectedPictureClone,
   controlsAutoLayout,
+  controlsSnapToGrid,
+  controlsGridSize,
 }: {
   canvas: HTMLCanvasElement;
   dragOverlay: HTMLElement;
@@ -27,16 +29,21 @@ export async function init({
   selectedPictureDelete: HTMLButtonElement;
   selectedPictureClone: HTMLButtonElement;
   controlsAutoLayout: HTMLInputElement;
+  controlsSnapToGrid: HTMLInputElement;
+  controlsGridSize: HTMLInputElement;
 }) {
-  let autoLayout = false;
+  let isAutoLayout = controlsAutoLayout.checked;
+  let isSnapToGrid = controlsSnapToGrid.checked;
   const state = (await loadState()) ?? emptyState();
   const view = emptyView();
 
   function frame() {
-    if (autoLayout) {
+    if (isAutoLayout) {
       for (let i = 0; i < 10; i++) {
         separate(state, state.gridSize);
-        snapToGrid(state, state.gridSize);
+        if (isSnapToGrid) {
+          snapToGrid(state, state.gridSize);
+        }
       }
       dirty = true;
     }
@@ -63,8 +70,7 @@ export async function init({
     selectedPictureWidth.value = picture.size[0].toString();
     selectedPictureHeight.value = picture.size[1].toString();
 
-    const [_sx, _sy, _sw, _sh, _dx, _dy, _dw, dh] = crop(picture);
-    const [left, top] = worldToWindow(view, [picture.pos[0], picture.pos[1] + dh / 2]);
+    const [left, top] = worldToWindow(view, [picture.pos[0], picture.pos[1] + picture.size[1] / 2]);
     selectedPictureControls.classList.add('visible');
     selectedPictureControls.style.left = `${left}px`;
     selectedPictureControls.style.top = `${top}px`;
@@ -165,7 +171,16 @@ export async function init({
   });
 
   controlsAutoLayout.addEventListener('change', () => {
-    autoLayout = controlsAutoLayout.checked;
+    isAutoLayout = controlsAutoLayout.checked;
+  });
+
+  controlsSnapToGrid.addEventListener('change', () => {
+    isSnapToGrid = controlsSnapToGrid.checked;
+  });
+
+  controlsGridSize.addEventListener('change', () => {
+    state.gridSize = Number.parseInt(controlsGridSize.value);
+    save();
   });
 
   clearButton.addEventListener('click', () => {
@@ -230,7 +245,9 @@ export async function init({
       const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
       draggingPicture.pos = [worldPos[0] - dragOffset[0], worldPos[1] - dragOffset[1]];
 
-      snapToGrid(state, state.gridSize);
+      if (isSnapToGrid) {
+        snapToGrid(state, state.gridSize);
+      }
 
       handleSelect(draggingPicture);
       save();
@@ -357,7 +374,13 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
   for (const picture of state.pictures) {
     const dimensions = crop(picture);
 
+    ctx.save();
+    ctx.shadowBlur = 1 / pixelSize;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
     ctx.drawImage(picture.bitmap, ...dimensions);
+    ctx.restore();
 
     if (view.selectedPicture === picture) {
       const [_sx, _sy, _sw, _sh, dx, dy, dw, dh] = dimensions;

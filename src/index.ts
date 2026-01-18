@@ -35,9 +35,17 @@ function main() {
     throw new Error('Selected picture clone not found');
   }
 
-  const controlsAutoLayout = document.getElementById('auto-layout') as HTMLInputElement | undefined;
+  const controlsAutoLayout = document.getElementById('auto-layout-input') as HTMLInputElement | undefined;
   if (!controlsAutoLayout) {
     throw new Error('Controls auto layout not found');
+  }
+  const controlsSnapToGrid = document.getElementById('snap-to-grid-input') as HTMLInputElement | undefined;
+  if (!controlsSnapToGrid) {
+    throw new Error('Controls snap to grid not found');
+  }
+  const controlsGridSize = document.getElementById('grid-size-input') as HTMLInputElement | undefined;
+  if (!controlsGridSize) {
+    throw new Error('Controls grid size not found');
   }
 
   init({
@@ -50,6 +58,8 @@ function main() {
     selectedPictureDelete,
     selectedPictureClone,
     controlsAutoLayout,
+    controlsSnapToGrid,
+    controlsGridSize,
   }).catch((error) => console.error(error));
 }
 

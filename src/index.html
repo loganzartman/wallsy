@@ -54,9 +54,17 @@
       <div>+ add items</div>
     </div>
     <div id="controls" class="controls">
-      <label for="auto-layout" class="labeled-input">
-        <span>auto layout</span>
-        <input type="checkbox" id="auto-layout" />
+      <label class="labeled-input">
+        <span>separate items</span>
+        <input type="checkbox" id="auto-layout-input" />
+      </label>
+      <label class="labeled-input">
+        <span>snap to grid</span>
+        <input type="checkbox" id="snap-to-grid-input" checked />
+      </label>
+      <label class="labeled-input">
+        <span>grid spacing</span>
+        <input type="number" id="grid-size-input" class="grid-size-input" value="1" />
       </label>
       <button id="clear-button" class="clear-button">clear</button>
     </div>

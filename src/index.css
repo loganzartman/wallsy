@@ -12,7 +12,11 @@ button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
+  border: 1px solid light-dark(#00000050, #ffffff50);
   background: light-dark(#eee, #111);
+  &:hover {
+    background: light-dark(#ccc, #333);
+  }
   color: light-dark(#111, #eee);
   font-size: 16px;
   font-family: system-ui;
@@ -23,8 +27,8 @@ button svg {
 }
 
 input {
-  border: 2px solid light-dark(#fff, #000);
-  background: light-dark(#f0f0f0, #333);
+  border: 1px solid light-dark(#00000030, #ffffff30);
+  background: light-dark(#ffffff50, #00000050);
   border-radius: 4px;
   padding: 4px;
   margin: 2px;
@@ -44,6 +48,11 @@ input {
   align-items: center;
   gap: 4px;
   overflow: hidden;
+  padding: 4px 8px;
+
+  border-radius: 8px;
+  border: 1px solid light-dark(#00000030, #ffffff30);
+  background: light-dark(#ffffff50, #00000050);
 }
 
 .selected-picture-controls {
@@ -55,7 +64,9 @@ input {
   gap: 8px;
 
   width: 300px;
-  background: light-dark(#ddd, #222);
+  border: 1px solid light-dark(#00000030, #ffffff30);
+  background: light-dark(#dddddda0, #222222a0);
+  backdrop-filter: blur(2px) saturate(2);
   border-radius: 8px;
   padding: 8px;
   opacity: 0;
@@ -83,6 +94,9 @@ input {
 
 .selected-picture-delete {
   background: light-dark(#f55, #a00);
+  &:hover {
+    background: light-dark(#c20, #c00);
+  }
 }
 
 .drag-overlay {
@@ -110,6 +124,7 @@ input {
 
   display: flex;
   flex-direction: row;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
 }
