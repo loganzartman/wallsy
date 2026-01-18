@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "keywords": [],
-  "license": "MIT",
+  "license": "MPL-2.0",
   "author": "",
   "source": "src/index.html",
   "scripts": {
