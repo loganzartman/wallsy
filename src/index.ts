@@ -35,6 +35,11 @@ function main() {
     throw new Error('Selected picture clone not found');
   }
 
+  const controlsAutoLayout = document.getElementById('auto-layout') as HTMLInputElement | undefined;
+  if (!controlsAutoLayout) {
+    throw new Error('Controls auto layout not found');
+  }
+
   init({
     canvas,
     dragOverlay,
@@ -44,6 +49,7 @@ function main() {
     selectedPictureHeight,
     selectedPictureDelete,
     selectedPictureClone,
+    controlsAutoLayout,
   }).catch((error) => console.error(error));
 }
 

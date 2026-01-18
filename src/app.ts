@@ -1,5 +1,6 @@
 import { clearState, loadState, storeState } from './db';
 import { debounce } from './debounce';
+import { separate, shiftTowardPoint } from './layout';
 import { crop, hitTest, type Picture } from './picture';
 import { emptyState, moveToTop, type State } from './state';
 import { emptyView, getMatrix, windowToWorld, worldToWindow, type View } from './view';
@@ -15,6 +16,7 @@ export async function init({
   selectedPictureHeight,
   selectedPictureDelete,
   selectedPictureClone,
+  controlsAutoLayout,
 }: {
   canvas: HTMLCanvasElement;
   dragOverlay: HTMLElement;
@@ -24,11 +26,18 @@ export async function init({
   selectedPictureHeight: HTMLInputElement;
   selectedPictureDelete: HTMLButtonElement;
   selectedPictureClone: HTMLButtonElement;
+  controlsAutoLayout: HTMLInputElement;
 }) {
+  let autoLayout = false;
   const state = (await loadState()) ?? emptyState();
   const view = emptyView();
 
   function frame() {
+    if (autoLayout) {
+      shiftTowardPoint(state, [0, 0], 0.1);
+      separate(state, 1);
+      dirty = true;
+    }
     redraw({ canvas, state, view });
     requestAnimationFrame(frame);
   }
@@ -121,6 +130,10 @@ export async function init({
     redraw({ canvas, state, view });
   });
 
+  controlsAutoLayout.addEventListener('change', () => {
+    autoLayout = controlsAutoLayout.checked;
+  });
+
   clearButton.addEventListener('click', () => {
     if (confirm('Really clear everything?')) {
       (async () => {
@@ -168,7 +181,7 @@ export async function init({
     dirty = true;
     redraw({ canvas, state, view });
   });
-  document.addEventListener('pointerup', (e) => {
+  document.addEventListener('pointerup', () => {
     draggingPicture = null;
   });
 

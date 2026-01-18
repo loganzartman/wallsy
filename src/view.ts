@@ -22,6 +22,7 @@ export function emptyView(view?: View): View {
 export function getMatrix(view: View): DOMMatrix {
   return new DOMMatrix()
     .scale(window.devicePixelRatio)
+    .translate(window.innerWidth / 2, window.innerHeight / 2)
     .scale(view.scale)
     .translate(...view.pan);
 }

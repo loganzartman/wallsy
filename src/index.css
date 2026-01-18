@@ -102,8 +102,13 @@ input {
   transition: opacity 0.2s ease-in-out;
 }
 
-.clear-button {
+.controls {
   position: absolute;
   bottom: 16px;
   right: 16px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
