@@ -4,6 +4,7 @@ export type View = {
   pan: [number, number];
   scale: number;
   selectedPicture: Picture | null;
+  hoveredPicture: Picture | null;
 };
 
 export function emptyView(view?: View): View {
@@ -12,10 +13,13 @@ export function emptyView(view?: View): View {
       pan: [0, 0],
       scale: 20,
       selectedPicture: null,
+      hoveredPicture: null,
     };
   }
   view.pan = [0, 0];
   view.scale = 1;
+  view.selectedPicture = null;
+  view.hoveredPicture = null;
   return view;
 }
 

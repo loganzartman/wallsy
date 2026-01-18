@@ -53,6 +53,7 @@ export async function init({
 
   function handleSelect(picture: Picture | null) {
     view.selectedPicture = picture;
+    view.hoveredPicture = null;
 
     if (!picture) {
       selectedPictureControls.classList.remove('visible');
@@ -68,6 +69,31 @@ export async function init({
     selectedPictureControls.style.left = `${left}px`;
     selectedPictureControls.style.top = `${top}px`;
   }
+
+  document.addEventListener('keydown', (e) => {
+    const targetPicture = view.hoveredPicture ?? view.selectedPicture;
+    if (!targetPicture) {
+      return;
+    }
+    if (e.key === 'Delete') {
+      state.pictures = state.pictures.filter((p) => p !== targetPicture);
+      handleSelect(null);
+      save();
+      dirty = true;
+      return;
+    }
+    if (e.key === 'd') {
+      const newPicture = {
+        ...targetPicture,
+        pos: [targetPicture.pos[0] + 1, targetPicture.pos[1] + 1],
+      } satisfies Picture;
+      state.pictures.push(newPicture);
+      handleSelect(newPicture);
+      save();
+      dirty = true;
+      return;
+    }
+  });
 
   selectedPictureWidth.addEventListener('change', () => {
     if (!view.selectedPicture) {
@@ -192,6 +218,7 @@ export async function init({
       redraw({ canvas, state, view });
       return;
     }
+
     if (draggingPicture) {
       e.preventDefault();
       const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
@@ -201,6 +228,15 @@ export async function init({
 
       handleSelect(draggingPicture);
       save();
+      dirty = true;
+      redraw({ canvas, state, view });
+      return;
+    }
+
+    const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
+    const hoveredPicture = hitTest(state.pictures, worldPos);
+    if (hoveredPicture !== view.hoveredPicture) {
+      view.hoveredPicture = hoveredPicture;
       dirty = true;
       redraw({ canvas, state, view });
     }
@@ -327,6 +363,10 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
       ctx.strokeStyle = '#31a7f3';
       ctx.lineWidth = 3 * pixelSize;
       ctx.stroke();
+    } else if (view.hoveredPicture === picture) {
+      const [_sx, _sy, _sw, _sh, dx, dy, dw, dh] = dimensions;
+      ctx.fillStyle = '#31a7f340';
+      ctx.fillRect(dx, dy, dw, dh);
     }
   }
   ctx.restore();
