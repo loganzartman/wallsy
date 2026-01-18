@@ -71,11 +71,17 @@ export async function init({
   }
 
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      handleSelect(null);
+      dirty = true;
+      return;
+    }
+
     const targetPicture = view.hoveredPicture ?? view.selectedPicture;
     if (!targetPicture) {
       return;
     }
-    if (e.key === 'Delete') {
+    if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'x') {
       state.pictures = state.pictures.filter((p) => p !== targetPicture);
       handleSelect(null);
       save();
