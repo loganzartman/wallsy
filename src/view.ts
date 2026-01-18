@@ -27,7 +27,7 @@ export function getMatrix(view: View): DOMMatrix {
     .translate(...view.pan);
 }
 
-export function windowToWorld(view: View, point: [number, number], vector: boolean = false): [number, number] {
+export function windowToWorld(view: View, point: readonly [number, number], vector: boolean = false): [number, number] {
   const matrix = getMatrix(view).inverse();
   const result = matrix.transformPoint({
     x: point[0] * window.devicePixelRatio,
@@ -37,7 +37,7 @@ export function windowToWorld(view: View, point: [number, number], vector: boole
   return [result.x, result.y];
 }
 
-export function worldToWindow(view: View, point: [number, number], vector: boolean = false): [number, number] {
+export function worldToWindow(view: View, point: readonly [number, number], vector: boolean = false): [number, number] {
   const matrix = getMatrix(view);
   const result = matrix.transformPoint({
     x: point[0],

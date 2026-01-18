@@ -150,6 +150,9 @@ export async function init({
   // handle moving pictures
   let draggingPicture: Picture | null = null;
   let dragOffset: [number, number] = [0, 0];
+  let panning = false;
+  let panOffset: [number, number] = [0, 0];
+
   document.addEventListener('pointerdown', (e) => {
     if (e.target !== canvas) {
       return;
@@ -160,6 +163,10 @@ export async function init({
     const picture = hitTest(state.pictures, windowToWorld(view, [e.clientX, e.clientY]));
     if (!picture) {
       handleSelect(null);
+
+      panning = true;
+      panOffset = [e.clientX, e.clientY];
+
       return;
     }
 
@@ -171,23 +178,58 @@ export async function init({
     save();
     redraw({ canvas, state, view });
   });
+
   document.addEventListener('pointermove', (e) => {
-    if (!draggingPicture) {
+    if (panning) {
+      e.preventDefault();
+      const delta = [e.clientX - panOffset[0], e.clientY - panOffset[1]] as const;
+      const deltaWorld = windowToWorld(view, delta, true);
+      view.pan[0] += deltaWorld[0];
+      view.pan[1] += deltaWorld[1];
+
+      panOffset = [e.clientX, e.clientY];
+      dirty = true;
+      redraw({ canvas, state, view });
       return;
     }
-    e.preventDefault();
-    const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
-    draggingPicture.pos = [worldPos[0] - dragOffset[0], worldPos[1] - dragOffset[1]];
+    if (draggingPicture) {
+      e.preventDefault();
+      const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
+      draggingPicture.pos = [worldPos[0] - dragOffset[0], worldPos[1] - dragOffset[1]];
 
-    snapToGrid(state, state.gridSize);
+      snapToGrid(state, state.gridSize);
 
-    handleSelect(draggingPicture);
-    save();
-    dirty = true;
-    redraw({ canvas, state, view });
+      handleSelect(draggingPicture);
+      save();
+      dirty = true;
+      redraw({ canvas, state, view });
+    }
   });
+
   document.addEventListener('pointerup', () => {
     draggingPicture = null;
+    panning = false;
+  });
+
+  document.addEventListener('wheel', (e) => {
+    e.preventDefault();
+
+    // Get world position under cursor before zoom
+    const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
+
+    // Apply zoom (scroll down = zoom out, scroll up = zoom in)
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    view.scale = Math.max(1, Math.min(200, view.scale * zoomFactor));
+
+    // Get world position under cursor after zoom
+    const newWorldPos = windowToWorld(view, [e.clientX, e.clientY]);
+
+    // Adjust pan so the same world position stays under cursor
+    view.pan[0] += newWorldPos[0] - worldPos[0];
+    view.pan[1] += newWorldPos[1] - worldPos[1];
+
+    dirty = true;
+    redraw({ canvas, state, view });
   });
 
   // prevent default drag/drop behavior
@@ -195,6 +237,7 @@ export async function init({
     e.preventDefault();
     e.stopPropagation();
   });
+
   document.addEventListener('drop', (e) => {
     e.preventDefault();
     e.stopPropagation();
