@@ -2,7 +2,7 @@ import { clearState, loadState, storeState } from './db';
 import { debounce } from './debounce';
 import { separate, snapPointToGrid, snapToGrid } from './layout';
 import { crop, hitTest, type Picture } from './picture';
-import { emptyState, moveToTop, type State } from './state';
+import { emptyState, generateManifest, moveToTop, type State } from './state';
 import { clearMeasure, emptyView, getMatrix, startMeasure, windowToWorld, worldToWindow, type View } from './view';
 
 let dirty = true;
@@ -11,6 +11,7 @@ export async function init({
   canvas,
   dragOverlay,
   clearButton,
+  manifestButton,
   selectedPictureControls,
   selectedPictureWidth,
   selectedPictureHeight,
@@ -23,6 +24,7 @@ export async function init({
   canvas: HTMLCanvasElement;
   dragOverlay: HTMLElement;
   clearButton: HTMLButtonElement;
+  manifestButton: HTMLButtonElement;
   selectedPictureControls: HTMLElement;
   selectedPictureWidth: HTMLInputElement;
   selectedPictureHeight: HTMLInputElement;
@@ -205,6 +207,16 @@ export async function init({
         dirty = true;
       })().catch((error) => console.error(error));
     }
+  });
+
+  manifestButton.addEventListener('click', () => {
+    const manifest = generateManifest(state);
+    const blob = new Blob([manifest], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'manifest.csv';
+    a.click();
   });
 
   // handle moving pictures

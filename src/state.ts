@@ -24,3 +24,16 @@ export function moveToTop(state: State, picture: Picture) {
     state.pictures.push(picture);
   }
 }
+
+export function generateManifest(state: State): string {
+  const countByDimensions = new Map<string, number>();
+  for (const picture of state.pictures) {
+    const dimensions = `${Math.min(...picture.size)}x${Math.max(...picture.size)}`;
+    countByDimensions.set(dimensions, (countByDimensions.get(dimensions) ?? 0) + 1);
+  }
+  const lines = Array.from(countByDimensions.entries()).map(
+    ([dimensions, count], i) =>
+      `${dimensions},${count},,=B${i + 2}*C${i + 2},${i > 0 ? '' : `=SUM(D2:D${countByDimensions.size + 1})`}`,
+  );
+  return ['size,count,price,cost,total', ...lines].join('\n');
+}

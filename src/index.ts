@@ -9,9 +9,14 @@ function main() {
   if (!dragOverlay) {
     throw new Error('Drag overlay not found');
   }
+
   const clearButton = document.getElementById('clear-button') as HTMLButtonElement | undefined;
   if (!clearButton) {
     throw new Error('Clear button not found');
+  }
+  const manifestButton = document.getElementById('manifest-button') as HTMLButtonElement | undefined;
+  if (!manifestButton) {
+    throw new Error('Manifest button not found');
   }
 
   const selectedPictureControls = document.getElementById('selected-picture-controls') as HTMLElement | undefined;
@@ -52,6 +57,7 @@ function main() {
     canvas,
     dragOverlay,
     clearButton,
+    manifestButton,
     selectedPictureControls,
     selectedPictureWidth,
     selectedPictureHeight,
