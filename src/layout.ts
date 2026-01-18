@@ -1,56 +1,75 @@
 import type { State } from './state';
-import { crop } from './picture';
+import { Picture } from './picture';
 
-export function shiftTowardPoint(state: State, target: [number, number], amount: number) {
+export function snapToGrid(state: State, cellSize: number) {
   for (const picture of state.pictures) {
-    const dist = Math.hypot(picture.pos[0] - target[0], picture.pos[1] - target[1]);
-    const dx = (target[0] - picture.pos[0]) / dist;
-    const dy = (target[1] - picture.pos[1]) / dist;
-    picture.pos[0] += dx * amount;
-    picture.pos[1] += dy * amount;
+    const x1 = picture.pos[0] - picture.size[0] / 2;
+    const y1 = picture.pos[1] - picture.size[1] / 2;
+    const rx = Math.round(x1 / cellSize) * cellSize;
+    const ry = Math.round(y1 / cellSize) * cellSize;
+    picture.pos[0] = rx + picture.size[0] / 2;
+    picture.pos[1] = ry + picture.size[1] / 2;
   }
 }
 
 export function separate(state: State, separation: number) {
-  const crops = new Map(state.pictures.map((picture) => [picture, crop(picture)]));
+  const forces = new Map<Picture, [number, number]>();
 
-  for (const [picture, pictureCrop] of crops) {
-    for (const [otherPicture, otherCrop] of crops) {
+  for (const picture of state.pictures) {
+    for (const otherPicture of state.pictures) {
       if (picture === otherPicture) continue;
 
-      const [_sx, _sy, _sw, _sh, dx, dy, dw, dh] = pictureCrop;
-      const [_osx, _osy, _osw, _osh, odx, ody, odw, odh] = otherCrop;
+      // Calculate bounding boxes
+      const x1 = picture.pos[0] - picture.size[0] / 2;
+      const x2 = picture.pos[0] + picture.size[0] / 2;
+      const y1 = picture.pos[1] - picture.size[1] / 2;
+      const y2 = picture.pos[1] + picture.size[1] / 2;
+      const ox1 = otherPicture.pos[0] - otherPicture.size[0] / 2;
+      const ox2 = otherPicture.pos[0] + otherPicture.size[0] / 2;
+      const oy1 = otherPicture.pos[1] - otherPicture.size[1] / 2;
+      const oy2 = otherPicture.pos[1] + otherPicture.size[1] / 2;
 
-      const x1 = dx - dw / 2;
-      const x2 = dx + dw / 2;
-      const y1 = dy - dh / 2;
-      const y2 = dy + dh / 2;
-      const ox1 = odx - odw / 2;
-      const ox2 = odx + odw / 2;
-      const oy1 = ody - odh / 2;
-      const oy2 = ody + odh / 2;
+      const isOverlapX = x1 < ox2 + separation && x2 > ox1 - separation;
+      const isOverlapY = y1 < oy2 + separation && y2 > oy1 - separation;
 
-      const overlapX = x1 < ox2 + separation && x2 > ox1 - separation;
-      const overlapY = y1 < oy2 + separation && y2 > oy1 - separation;
+      if (!(isOverlapX && isOverlapY)) {
+        continue;
+      }
 
-      if (overlapX && overlapY) {
-        const centerDx = dx - odx;
-        const centerDy = dy - ody;
-        const dist = Math.hypot(centerDx, centerDy);
+      // Calculate overlap amounts in each direction
+      const overlapX = Math.min(x2, ox2) - Math.max(x1, ox1) + separation;
+      const overlapY = Math.min(y2, oy2) - Math.max(y1, oy1) + separation;
 
-        if (dist > 0) {
-          const nx = centerDx / dist;
-          const ny = centerDy / dist;
-          const overlapAmount = Math.min(
-            ox2 + separation - x1,
-            x2 + separation - ox1,
-            oy2 + separation - y1,
-            y2 + separation - oy1,
-          );
-          picture.pos[0] += (nx * overlapAmount) / 2;
-          picture.pos[1] += (ny * overlapAmount) / 2;
-        }
+      // Determine push direction based on center positions
+      // Use array index as tiebreaker when positions are equal
+      const pictureIdx = state.pictures.indexOf(picture);
+      const otherIdx = state.pictures.indexOf(otherPicture);
+      const pushDirX =
+        picture.pos[0] < otherPicture.pos[0] || (picture.pos[0] === otherPicture.pos[0] && pictureIdx < otherIdx)
+          ? -1
+          : 1;
+      const pushDirY =
+        picture.pos[1] < otherPicture.pos[1] || (picture.pos[1] === otherPicture.pos[1] && pictureIdx < otherIdx)
+          ? -1
+          : 1;
+
+      // Initialize force for this picture if needed
+      if (!forces.has(picture)) {
+        forces.set(picture, [0, 0]);
+      }
+      const force = forces.get(picture)!;
+
+      // Push in direction of smallest overlap
+      if (overlapX < overlapY) {
+        force[0] += pushDirX * overlapX * 0.5;
+      } else {
+        force[1] += pushDirY * overlapY * 0.5;
       }
     }
+  }
+
+  for (const [picture, force] of forces) {
+    picture.pos[0] += force[0];
+    picture.pos[1] += force[1];
   }
 }

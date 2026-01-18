@@ -1,6 +1,6 @@
 import { clearState, loadState, storeState } from './db';
 import { debounce } from './debounce';
-import { separate, shiftTowardPoint } from './layout';
+import { separate, snapToGrid } from './layout';
 import { crop, hitTest, type Picture } from './picture';
 import { emptyState, moveToTop, type State } from './state';
 import { emptyView, getMatrix, windowToWorld, worldToWindow, type View } from './view';
@@ -34,8 +34,10 @@ export async function init({
 
   function frame() {
     if (autoLayout) {
-      shiftTowardPoint(state, [0, 0], 0.1);
-      separate(state, 1);
+      for (let i = 0; i < 10; i++) {
+        separate(state, state.gridSize);
+        snapToGrid(state, state.gridSize);
+      }
       dirty = true;
     }
     redraw({ canvas, state, view });
@@ -176,6 +178,9 @@ export async function init({
     e.preventDefault();
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
     draggingPicture.pos = [worldPos[0] - dragOffset[0], worldPos[1] - dragOffset[1]];
+
+    snapToGrid(state, state.gridSize);
+
     handleSelect(draggingPicture);
     save();
     dirty = true;

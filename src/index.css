@@ -5,6 +5,7 @@ body {
   background: light-dark(#eee, #111);
   color: light-dark(#111, #eee);
   font-family: system-ui;
+  overflow: hidden;
 }
 
 button {
