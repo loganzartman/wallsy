@@ -1,9 +1,9 @@
 import { clearState, loadState, storeState } from './db';
 import { debounce } from './debounce';
-import { separate, snapToGrid } from './layout';
+import { separate, snapPointToGrid, snapToGrid } from './layout';
 import { crop, hitTest, type Picture } from './picture';
 import { emptyState, moveToTop, type State } from './state';
-import { emptyView, getMatrix, windowToWorld, worldToWindow, type View } from './view';
+import { clearMeasure, emptyView, getMatrix, startMeasure, windowToWorld, worldToWindow, type View } from './view';
 
 let dirty = true;
 
@@ -32,10 +32,16 @@ export async function init({
   controlsSnapToGrid: HTMLInputElement;
   controlsGridSize: HTMLInputElement;
 }) {
-  let isAutoLayout = controlsAutoLayout.checked;
-  let isSnapToGrid = controlsSnapToGrid.checked;
   const state = (await loadState()) ?? emptyState();
   const view = emptyView();
+
+  let isAutoLayout = controlsAutoLayout.checked;
+  let isSnapToGrid = controlsSnapToGrid.checked;
+
+  let draggingPicture: Picture | null = null;
+  let dragOffset: [number, number] = [0, 0];
+  let panning = false;
+  let panOffset: [number, number] = [0, 0];
 
   function frame() {
     if (isAutoLayout) {
@@ -78,6 +84,13 @@ export async function init({
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      clearMeasure(view);
+      handleSelect(null);
+      dirty = true;
+      return;
+    }
+    if (e.key === 'm') {
+      startMeasure(view);
       handleSelect(null);
       dirty = true;
       return;
@@ -195,17 +208,21 @@ export async function init({
   });
 
   // handle moving pictures
-  let draggingPicture: Picture | null = null;
-  let dragOffset: [number, number] = [0, 0];
-  let panning = false;
-  let panOffset: [number, number] = [0, 0];
-
   document.addEventListener('pointerdown', (e) => {
     if (e.target !== canvas) {
       return;
     }
 
-    dirty = true;
+    if (view.measuring && view.measuring !== 'done') {
+      if (view.measuring === 'first') {
+        view.measuring = 'second';
+      } else {
+        view.measuring = 'done';
+      }
+      dirty = true;
+      redraw({ canvas, state, view });
+      return;
+    }
 
     const picture = hitTest(state.pictures, windowToWorld(view, [e.clientX, e.clientY]));
     if (!picture) {
@@ -223,6 +240,7 @@ export async function init({
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
     dragOffset = [worldPos[0] - picture.pos[0], worldPos[1] - picture.pos[1]];
     save();
+    dirty = true;
     redraw({ canvas, state, view });
   });
 
@@ -251,6 +269,21 @@ export async function init({
 
       handleSelect(draggingPicture);
       save();
+      dirty = true;
+      redraw({ canvas, state, view });
+      return;
+    }
+
+    if (view.measuring && view.measuring !== 'done') {
+      let mousePos = windowToWorld(view, [e.clientX, e.clientY]);
+      if (isSnapToGrid) {
+        mousePos = snapPointToGrid(mousePos, state.gridSize);
+      }
+      if (view.measuring === 'first') {
+        view.measureFrom = mousePos;
+      } else if (view.measuring === 'second') {
+        view.measureTo = mousePos;
+      }
       dirty = true;
       redraw({ canvas, state, view });
       return;
@@ -398,5 +431,59 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
       ctx.fillRect(dx, dy, dw, dh);
     }
   }
+
+  if (view.measuring && view.measureFrom) {
+    if (view.measureTo) {
+      ctx.beginPath();
+      ctx.moveTo(view.measureFrom[0], view.measureFrom[1]);
+      ctx.lineTo(view.measureTo[0], view.measureTo[1]);
+
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 10 * pixelSize;
+      ctx.stroke();
+
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 4 * pixelSize;
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(view.measureFrom[0], view.measureFrom[1], 4 * pixelSize, 0, 2 * Math.PI);
+
+    ctx.lineWidth = 6 * pixelSize;
+    ctx.strokeStyle = 'black';
+    ctx.fillStyle = 'white';
+    ctx.stroke();
+    ctx.fill();
+
+    if (view.measureTo) {
+      ctx.beginPath();
+      ctx.arc(view.measureTo[0], view.measureTo[1], 4 * pixelSize, 0, 2 * Math.PI);
+
+      ctx.lineWidth = 6 * pixelSize;
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+      ctx.fillStyle = 'white';
+      ctx.fill();
+
+      const dx = view.measureTo[0] - view.measureFrom[0];
+      const dy = view.measureTo[1] - view.measureFrom[1];
+      const angle = Math.atan2(dy, dx);
+      const length = Math.hypot(dx, dy);
+      const text = `${length.toFixed(1)}`;
+      const textX = view.measureFrom[0] + dx * 0.5 + Math.cos(angle + Math.PI / 2) * 36 * pixelSize;
+      const textY = view.measureFrom[1] + dy * 0.5 + Math.sin(angle + Math.PI / 2) * 36 * pixelSize;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${36 * pixelSize}px system-ui`;
+
+      ctx.lineWidth = 6 * pixelSize;
+      ctx.fillStyle = 'black';
+      ctx.strokeText(text, textX, textY);
+      ctx.fillStyle = 'white';
+      ctx.fillText(text, textX, textY);
+    }
+  }
+
   ctx.restore();
 }

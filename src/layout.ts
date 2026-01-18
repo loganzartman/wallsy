@@ -1,6 +1,10 @@
 import type { State } from './state';
 import { Picture } from './picture';
 
+export function snapPointToGrid(point: [number, number], cellSize: number): [number, number] {
+  return [Math.round(point[0] / cellSize) * cellSize, Math.round(point[1] / cellSize) * cellSize];
+}
+
 export function snapToGrid(state: State, cellSize: number) {
   for (const picture of state.pictures) {
     const x1 = picture.pos[0] - picture.size[0] / 2;

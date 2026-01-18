@@ -3,8 +3,13 @@ import type { Picture } from './picture';
 export type View = {
   pan: [number, number];
   scale: number;
+
   selectedPicture: Picture | null;
   hoveredPicture: Picture | null;
+
+  measuring: 'first' | 'second' | 'done' | null;
+  measureFrom: [number, number] | null;
+  measureTo: [number, number] | null;
 };
 
 export function emptyView(view?: View): View {
@@ -12,15 +17,36 @@ export function emptyView(view?: View): View {
     return {
       pan: [0, 0],
       scale: 20,
+
       selectedPicture: null,
       hoveredPicture: null,
+
+      measuring: null,
+      measureFrom: null,
+      measureTo: null,
     };
   }
+
   view.pan = [0, 0];
   view.scale = 1;
   view.selectedPicture = null;
   view.hoveredPicture = null;
+  view.measuring = null;
+  view.measureFrom = null;
+  view.measureTo = null;
   return view;
+}
+
+export function clearMeasure(view: View) {
+  view.measuring = null;
+  view.measureFrom = null;
+  view.measureTo = null;
+}
+
+export function startMeasure(view: View) {
+  view.measuring = 'first';
+  view.measureFrom = null;
+  view.measureTo = null;
 }
 
 export function getMatrix(view: View): DOMMatrix {
