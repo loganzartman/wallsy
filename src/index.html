@@ -70,12 +70,12 @@
       </label>
       <button id="clear-button" class="button button--action button--destructive">clear</button>
       <button popovertarget="export-popover" class="export-menu-button button button--action">export</button>
-      <div id="export-popover" popover class="export-menu-popover">
+      <div id="export-popover" popover="auto" class="export-menu-popover">
         <div class="menu export-menu-popover__content">
-          <button id="export-bom-button" class="menu-item">
+          <button id="export-bom-button" popovertarget="export-popover" popovertargetaction="hide" class="menu-item">
             <div class="menu-item__text">bill of materials</div>
           </button>
-          <button id="export-images-button" class="menu-item">
+          <button id="export-images-button" popovertarget="export-popover" popovertargetaction="hide" class="menu-item">
             <div class="menu-item__text">all images</div>
           </button>
         </div>

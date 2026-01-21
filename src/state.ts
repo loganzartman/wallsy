@@ -1,3 +1,4 @@
+import { zip } from 'fflate';
 import type { Picture } from './picture';
 
 export type State = {
@@ -36,4 +37,29 @@ export function generateManifest(state: State): string {
       `${dimensions},${count},,=B${i + 2}*C${i + 2},${i > 0 ? '' : `=SUM(D2:D${countByDimensions.size + 1})`}`,
   );
   return ['size,count,price,cost,total', ...lines].join('\n');
+}
+
+export async function generatePicturesZip(state: State): Promise<Blob> {
+  const picturesByDimensions: Record<string, Record<string, Uint8Array>> = {};
+  for (const picture of state.pictures) {
+    const dimensions = `${Math.min(...picture.size)}x${Math.max(...picture.size)}`;
+    picturesByDimensions[dimensions] ??= {};
+    picturesByDimensions[dimensions][picture.name] = new Uint8Array(await picture.blob.arrayBuffer());
+  }
+  const result = Promise.withResolvers<Blob>();
+  zip(
+    picturesByDimensions,
+    {
+      // most images already compressed
+      level: 0,
+    },
+    (err, data) => {
+      if (err) {
+        result.reject(err);
+      } else {
+        result.resolve(new Blob([data.buffer as ArrayBuffer]));
+      }
+    },
+  );
+  return result.promise;
 }

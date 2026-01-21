@@ -2,7 +2,7 @@ import { clearState, loadState, storeState } from './db';
 import { debounce } from './debounce';
 import { separate, snapPointToGrid, snapToGrid } from './layout';
 import { crop, hitTest, type Picture } from './picture';
-import { emptyState, generateManifest, moveToTop, type State } from './state';
+import { emptyState, generateManifest, generatePicturesZip, moveToTop, type State } from './state';
 import { clearMeasure, emptyView, getMatrix, startMeasure, windowToWorld, worldToWindow, type View } from './view';
 
 let dirty = true;
@@ -222,6 +222,17 @@ export async function init() {
     a.href = url;
     a.download = `bill-of-materials_${fileDate()}.csv`;
     a.click();
+  });
+
+  exportImagesButton.addEventListener('click', () => {
+    (async () => {
+      const blob = await generatePicturesZip(state);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `images_${fileDate()}.zip`;
+      a.click();
+    })().catch((error) => console.error(error));
   });
 
   // handle moving pictures
@@ -519,6 +530,6 @@ function el<T extends HTMLElement>(ctor: { new (...args: unknown[]): T }, id: st
 
 function fileDate(): string {
   const d = new Date();
-  const p = (n) => String(n).padStart(2, '0');
+  const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}`;
 }
