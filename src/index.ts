@@ -1,72 +1,7 @@
 import { init } from './app';
 
 function main() {
-  const canvas = document.getElementById('canvas') as HTMLCanvasElement | undefined;
-  if (!canvas) {
-    throw new Error('Canvas not found');
-  }
-  const dragOverlay = document.getElementById('drag-overlay') as HTMLElement | undefined;
-  if (!dragOverlay) {
-    throw new Error('Drag overlay not found');
-  }
-
-  const clearButton = document.getElementById('clear-button') as HTMLButtonElement | undefined;
-  if (!clearButton) {
-    throw new Error('Clear button not found');
-  }
-  const manifestButton = document.getElementById('manifest-button') as HTMLButtonElement | undefined;
-  if (!manifestButton) {
-    throw new Error('Manifest button not found');
-  }
-
-  const selectedPictureControls = document.getElementById('selected-picture-controls') as HTMLElement | undefined;
-  if (!selectedPictureControls) {
-    throw new Error('Selected picture controls not found');
-  }
-  const selectedPictureWidth = document.getElementById('selected-picture-width') as HTMLInputElement | undefined;
-  if (!selectedPictureWidth) {
-    throw new Error('Selected picture width not found');
-  }
-  const selectedPictureHeight = document.getElementById('selected-picture-height') as HTMLInputElement | undefined;
-  if (!selectedPictureHeight) {
-    throw new Error('Selected picture height not found');
-  }
-  const selectedPictureDelete = document.getElementById('selected-picture-delete') as HTMLButtonElement | undefined;
-  if (!selectedPictureDelete) {
-    throw new Error('Selected picture delete not found');
-  }
-  const selectedPictureClone = document.getElementById('selected-picture-clone') as HTMLButtonElement | undefined;
-  if (!selectedPictureClone) {
-    throw new Error('Selected picture clone not found');
-  }
-
-  const controlsAutoLayout = document.getElementById('auto-layout-input') as HTMLInputElement | undefined;
-  if (!controlsAutoLayout) {
-    throw new Error('Controls auto layout not found');
-  }
-  const controlsSnapToGrid = document.getElementById('snap-to-grid-input') as HTMLInputElement | undefined;
-  if (!controlsSnapToGrid) {
-    throw new Error('Controls snap to grid not found');
-  }
-  const controlsGridSize = document.getElementById('grid-size-input') as HTMLInputElement | undefined;
-  if (!controlsGridSize) {
-    throw new Error('Controls grid size not found');
-  }
-
-  init({
-    canvas,
-    dragOverlay,
-    clearButton,
-    manifestButton,
-    selectedPictureControls,
-    selectedPictureWidth,
-    selectedPictureHeight,
-    selectedPictureDelete,
-    selectedPictureClone,
-    controlsAutoLayout,
-    controlsSnapToGrid,
-    controlsGridSize,
-  }).catch((error) => console.error(error));
+  init().catch((error) => console.error(error));
 }
 
 main();

@@ -7,33 +7,22 @@ import { clearMeasure, emptyView, getMatrix, startMeasure, windowToWorld, worldT
 
 let dirty = true;
 
-export async function init({
-  canvas,
-  dragOverlay,
-  clearButton,
-  manifestButton,
-  selectedPictureControls,
-  selectedPictureWidth,
-  selectedPictureHeight,
-  selectedPictureDelete,
-  selectedPictureClone,
-  controlsAutoLayout,
-  controlsSnapToGrid,
-  controlsGridSize,
-}: {
-  canvas: HTMLCanvasElement;
-  dragOverlay: HTMLElement;
-  clearButton: HTMLButtonElement;
-  manifestButton: HTMLButtonElement;
-  selectedPictureControls: HTMLElement;
-  selectedPictureWidth: HTMLInputElement;
-  selectedPictureHeight: HTMLInputElement;
-  selectedPictureDelete: HTMLButtonElement;
-  selectedPictureClone: HTMLButtonElement;
-  controlsAutoLayout: HTMLInputElement;
-  controlsSnapToGrid: HTMLInputElement;
-  controlsGridSize: HTMLInputElement;
-}) {
+export async function init() {
+  const canvas = el(HTMLCanvasElement, 'canvas');
+  const emptyOverlay = el(HTMLElement, 'empty-overlay');
+  const dragOverlay = el(HTMLElement, 'drag-overlay');
+  const clearButton = el(HTMLButtonElement, 'clear-button');
+  const exportBomButton = el(HTMLButtonElement, 'export-bom-button');
+  const exportImagesButton = el(HTMLButtonElement, 'export-images-button');
+  const selectedPictureControls = el(HTMLElement, 'selected-picture-controls');
+  const selectedPictureWidth = el(HTMLInputElement, 'selected-picture-width');
+  const selectedPictureHeight = el(HTMLInputElement, 'selected-picture-height');
+  const selectedPictureDelete = el(HTMLButtonElement, 'selected-picture-delete');
+  const selectedPictureClone = el(HTMLButtonElement, 'selected-picture-clone');
+  const controlsAutoLayout = el(HTMLInputElement, 'auto-layout-input');
+  const controlsSnapToGrid = el(HTMLInputElement, 'snap-to-grid-input');
+  const controlsGridSize = el(HTMLInputElement, 'grid-size-input');
+
   const state = (await loadState()) ?? emptyState();
   const view = emptyView();
 
@@ -45,6 +34,15 @@ export async function init({
   let panning = false;
   let panOffset: [number, number] = [0, 0];
 
+  function handleStateUpdated() {
+    if (state.pictures.length === 0) {
+      emptyOverlay.style.opacity = '1';
+    } else {
+      emptyOverlay.style.opacity = '0';
+    }
+  }
+  handleStateUpdated();
+
   function frame() {
     if (isAutoLayout) {
       for (let i = 0; i < 10; i++) {
@@ -53,6 +51,7 @@ export async function init({
           snapToGrid(state, state.gridSize);
         }
       }
+      handleStateUpdated();
       dirty = true;
     }
     redraw({ canvas, state, view });
@@ -104,6 +103,7 @@ export async function init({
     }
     if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'x') {
       state.pictures = state.pictures.filter((p) => p !== targetPicture);
+      handleStateUpdated();
       handleSelect(null);
       save();
       dirty = true;
@@ -115,6 +115,7 @@ export async function init({
         pos: [targetPicture.pos[0] + 1, targetPicture.pos[1] + 1],
       } satisfies Picture;
       state.pictures.push(newPicture);
+      handleStateUpdated();
       handleSelect(newPicture);
       save();
       dirty = true;
@@ -162,6 +163,7 @@ export async function init({
     const picture = view.selectedPicture;
     handleSelect(null);
     state.pictures = state.pictures.filter((p) => p !== picture);
+    handleStateUpdated();
     save();
     dirty = true;
     redraw({ canvas, state, view });
@@ -178,6 +180,7 @@ export async function init({
     } satisfies Picture;
 
     state.pictures.push(newPicture);
+    handleStateUpdated();
     handleSelect(newPicture);
 
     save();
@@ -195,6 +198,7 @@ export async function init({
 
   controlsGridSize.addEventListener('change', () => {
     state.gridSize = Number.parseInt(controlsGridSize.value);
+    handleStateUpdated();
     save();
   });
 
@@ -204,18 +208,19 @@ export async function init({
         handleSelect(null);
         await clearState();
         emptyState(state);
+        handleStateUpdated();
         dirty = true;
       })().catch((error) => console.error(error));
     }
   });
 
-  manifestButton.addEventListener('click', () => {
+  exportBomButton.addEventListener('click', () => {
     const manifest = generateManifest(state);
     const blob = new Blob([manifest], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'manifest.csv';
+    a.download = `bill-of-materials_${fileDate()}.csv`;
     a.click();
   });
 
@@ -302,7 +307,7 @@ export async function init({
     }
 
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
-    const hoveredPicture = hitTest(state.pictures, worldPos);
+    const hoveredPicture = e.target === canvas ? hitTest(state.pictures, worldPos) : null;
     if (hoveredPicture !== view.hoveredPicture) {
       view.hoveredPicture = hoveredPicture;
       dirty = true;
@@ -384,6 +389,7 @@ export async function init({
         pos[1] += 1;
       }
       dirty = true;
+      handleStateUpdated();
       save();
     })().catch((error) => console.error(error));
   });
@@ -498,4 +504,21 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
   }
 
   ctx.restore();
+}
+
+function el<T extends HTMLElement>(ctor: { new (...args: unknown[]): T }, id: string): T {
+  const element = document.getElementById(id);
+  if (!element) {
+    throw new Error(`Element ${id} not found`);
+  }
+  if (!(element instanceof ctor)) {
+    throw new Error(`Element ${id} is not a ${ctor.name}`);
+  }
+  return element;
+}
+
+function fileDate(): string {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}`;
 }

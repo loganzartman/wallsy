@@ -5,26 +5,25 @@
   </head>
   <body>
     <canvas id="canvas" class="canvas"></canvas>
-    <div id="selected-picture-controls" class="selected-picture-controls">
-      <div id="selected-picture-size" class="selected-picture-size">
-        <label class="labeled-input">
+    <div id="selected-picture-controls" class="pic-controls">
+      <div id="selected-picture-size" class="pic-controls__size">
+        <label class="label">
           <span>w</span>
           <input id="selected-picture-width" type="number" />
         </label>
-        <label class="labeled-input">
+        <label class="label">
           <span>h</span>
           <input id="selected-picture-height" type="number" />
         </label>
       </div>
-      <div id="selected-picture-sizes" class="selected-picture-sizes"></div>
-      <button id="selected-picture-delete" class="selected-picture-delete">
+      <button id="selected-picture-delete" class="button button--action button--destructive">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="size-6"
+          class="button__icon"
         >
           <path
             stroke-linecap="round"
@@ -33,14 +32,14 @@
           />
         </svg>
       </button>
-      <button id="selected-picture-clone">
+      <button id="selected-picture-clone" class="button button--action">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="size-6"
+          class="button__icon"
         >
           <path
             stroke-linecap="round"
@@ -50,24 +49,37 @@
         </svg>
       </button>
     </div>
-    <div id="drag-overlay" class="drag-overlay">
-      <div>+ add items</div>
+    <div id="empty-overlay" class="overlay">
+      <div>drag and drop to add pictures</div>
+    </div>
+    <div id="drag-overlay" class="overlay">
+      <div>+ add pictures</div>
     </div>
     <div id="controls" class="controls">
-      <label class="labeled-input">
+      <label class="label">
         <span>separate items</span>
         <input type="checkbox" id="auto-layout-input" />
       </label>
-      <label class="labeled-input">
+      <label class="label">
         <span>snap to grid</span>
         <input type="checkbox" id="snap-to-grid-input" checked />
       </label>
-      <label class="labeled-input">
+      <label class="label">
         <span>grid spacing</span>
-        <input type="number" id="grid-size-input" class="grid-size-input" value="1" />
+        <input type="number" id="grid-size-input" value="1" />
       </label>
-      <button id="clear-button" class="clear-button">clear</button>
-      <button id="manifest-button" class="manifest-button">manifest</button>
+      <button id="clear-button" class="button button--action button--destructive">clear</button>
+      <button popovertarget="export-popover" class="export-menu-button button button--action">export</button>
+      <div id="export-popover" popover class="export-menu-popover">
+        <div class="menu export-menu-popover__content">
+          <button id="export-bom-button" class="menu-item">
+            <div class="menu-item__text">bill of materials</div>
+          </button>
+          <button id="export-images-button" class="menu-item">
+            <div class="menu-item__text">all images</div>
+          </button>
+        </div>
+      </div>
     </div>
     <script type="module" src="index.ts"></script>
   </body>

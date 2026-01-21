@@ -9,20 +9,40 @@ body {
 }
 
 button {
-  padding: 8px 16px;
+  background: none;
   border: none;
-  border-radius: 4px;
-  border: 1px solid light-dark(#00000050, #ffffff50);
-  background: light-dark(#eee, #111);
-  &:hover {
-    background: light-dark(#ccc, #333);
-  }
-  color: light-dark(#111, #eee);
-  font-size: 16px;
   font-family: system-ui;
 }
 
-button svg {
+[popover] {
+  border: none;
+  background: none;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid light-dark(#00000050, #ffffff50);
+  color: light-dark(#111, #eee);
+  background: light-dark(#eeeeeec0, #111111c0);
+  backdrop-filter: blur(8px) saturate(2);
+  font-size: 16px;
+
+  transition: background 0.2s ease-out;
+
+  &:hover {
+    background: light-dark(#ddddddc0, #222222c0);
+  }
+}
+
+.button--destructive {
+  background: light-dark(#f55, #a00);
+  &:hover {
+    background: light-dark(#c20, #c00);
+  }
+}
+
+.button__icon {
   width: 16px;
 }
 
@@ -42,7 +62,7 @@ input {
   height: 100%;
 }
 
-.labeled-input {
+.label {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -52,10 +72,11 @@ input {
 
   border-radius: 8px;
   border: 1px solid light-dark(#00000030, #ffffff30);
-  background: light-dark(#ffffff50, #00000050);
+  background: light-dark(#eeeeeec0, #111111c0);
+  backdrop-filter: blur(8px) saturate(2);
 }
 
-.selected-picture-controls {
+.pic-controls {
   position: absolute;
   transform: translate(-50%, 0px);
 
@@ -77,14 +98,14 @@ input {
     visibility 0.2s ease;
 }
 
-.selected-picture-controls.visible {
+.pic-controls.visible {
   visibility: visible;
 
   opacity: 1;
   transform: translate(-50%, 16px);
 }
 
-.selected-picture-size {
+.pic-controls__size {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -92,14 +113,7 @@ input {
   gap: 8px;
 }
 
-.selected-picture-delete {
-  background: light-dark(#f55, #a00);
-  &:hover {
-    background: light-dark(#c20, #c00);
-  }
-}
-
-.drag-overlay {
+.overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -112,6 +126,7 @@ input {
   font-size: 36px;
   font-family: system-ui;
   background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(16px) saturate(2);
   opacity: 0;
 
   transition: opacity 0.2s ease-in-out;
@@ -127,4 +142,55 @@ input {
   align-items: stretch;
   justify-content: center;
   gap: 16px;
+}
+
+.export-menu-button {
+  anchor-name: --export-button;
+}
+
+.export-menu-popover__content {
+  position: fixed;
+  position-anchor: --export-button;
+  bottom: calc(anchor(top) + 8px);
+  right: anchor(right);
+}
+
+.menu {
+  padding: 8px;
+  min-width: 200px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+
+  border: 1px solid light-dark(#00000050, #ffffff50);
+  background: light-dark(#eeeeeec0, #111111c0);
+  backdrop-filter: blur(8px) saturate(2);
+  border-radius: 8px;
+}
+
+.menu-item {
+  border-radius: 4px;
+  padding: 8px 8px;
+
+  transition: background 0.2s ease-out;
+
+  display: flex;
+  flex-direction: row;
+
+  &:hover {
+    background: light-dark(#00000010, #ffffff10);
+    transition: none;
+  }
+}
+
+.menu-item__icon {
+  height: 16px;
+  margin-right: 8px;
+}
+
+.menu-item__text {
+  flex: 1;
+  text-align: left;
 }
