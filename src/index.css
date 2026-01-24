@@ -12,6 +12,7 @@ button {
   background: none;
   border: none;
   font-family: system-ui;
+  font-size: inherit;
 }
 
 [popover] {
@@ -20,6 +21,8 @@ button {
 }
 
 .button {
+  user-select: none;
+
   padding: 8px 16px;
   border-radius: 4px;
   border: 1px solid light-dark(#00000050, #ffffff50);
@@ -66,14 +69,43 @@ input {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 16px;
+
   overflow: hidden;
-  padding: 4px 8px;
+  padding: 4px 12px;
+  min-height: 32px;
 
   border-radius: 8px;
-  border: 1px solid light-dark(#00000030, #ffffff30);
-  background: light-dark(#eeeeeec0, #111111c0);
+  border: 1px solid light-dark(#00000020, #ffffff20);
+  background: light-dark(#eeeeee10, #11111110);
   backdrop-filter: blur(8px) saturate(2);
+}
+
+.label--quiet {
+  border: none;
+  background: none;
+  backdrop-filter: none;
+}
+
+.label__text {
+  flex-basis: 0;
+  flex-grow: 2;
+  flex-shrink: 0;
+}
+
+.label__input {
+  flex-basis: 32px;
+  flex-grow: 1;
+  flex-shrink: 1;
+
+  &[type='checkbox'] {
+    flex-grow: 0;
+  }
+
+  &[type='number'] {
+    text-align: right;
+  }
 }
 
 .pic-controls {
@@ -134,14 +166,25 @@ input {
 
 .controls {
   position: absolute;
-  bottom: 16px;
-  right: 16px;
+  left: 16px;
+  top: 16px;
 
   display: flex;
   flex-direction: row;
   align-items: stretch;
   justify-content: center;
   gap: 16px;
+}
+
+.layout-menu-button {
+  anchor-name: --layout-button;
+}
+
+.layout-menu-popover__content {
+  position: fixed;
+  position-anchor: --layout-button;
+  top: calc(anchor(bottom) + 8px);
+  left: anchor(left);
 }
 
 .export-menu-button {
@@ -151,18 +194,19 @@ input {
 .export-menu-popover__content {
   position: fixed;
   position-anchor: --export-button;
-  bottom: calc(anchor(top) + 8px);
-  right: anchor(right);
+  top: calc(anchor(bottom) + 8px);
+  left: anchor(left);
 }
 
 .menu {
-  padding: 8px;
+  padding: 12px 8px;
   min-width: 200px;
 
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
+  gap: 8px;
 
   border: 1px solid light-dark(#00000050, #ffffff50);
   background: light-dark(#eeeeeec0, #111111c0);
@@ -171,8 +215,10 @@ input {
 }
 
 .menu-item {
+  user-select: none;
+
   border-radius: 4px;
-  padding: 8px 8px;
+  padding: 8px 12px;
 
   transition: background 0.2s ease-out;
 
@@ -182,6 +228,23 @@ input {
   &:hover {
     background: light-dark(#00000010, #ffffff10);
     transition: none;
+  }
+}
+
+.menu-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 16px 4px 16px;
+  color: light-dark(#00000090, #ffffff90);
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: light-dark(#00000090, #ffffff90);
   }
 }
 

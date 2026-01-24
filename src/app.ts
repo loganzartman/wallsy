@@ -1,6 +1,6 @@
 import { clearState, loadState, storeState } from './db';
 import { debounce } from './debounce';
-import { separate, snapPointToGrid, snapToGrid } from './layout';
+import { layoutCluster, layoutHorizontalRail, separate, snapPointToGrid, snapToGrid } from './layout';
 import { crop, hitTest, type Picture } from './picture';
 import { emptyState, generateManifest, generatePicturesZip, moveToTop, type State } from './state';
 import { clearMeasure, emptyView, getMatrix, startMeasure, windowToWorld, worldToWindow, type View } from './view';
@@ -12,13 +12,23 @@ export async function init() {
   const emptyOverlay = el(HTMLElement, 'empty-overlay');
   const dragOverlay = el(HTMLElement, 'drag-overlay');
   const clearButton = el(HTMLButtonElement, 'clear-button');
+
+  const layoutClusterButton = el(HTMLButtonElement, 'layout-cluster-button');
+  const layoutGridButton = el(HTMLButtonElement, 'layout-grid-button');
+  const layoutRowButton = el(HTMLButtonElement, 'layout-row-button');
+  const layoutColumnButton = el(HTMLButtonElement, 'layout-column-button');
+  const layoutHrailButton = el(HTMLButtonElement, 'layout-hrail-button');
+  const layoutVrailButton = el(HTMLButtonElement, 'layout-vrail-button');
+
   const exportBomButton = el(HTMLButtonElement, 'export-bom-button');
   const exportImagesButton = el(HTMLButtonElement, 'export-images-button');
+
   const selectedPictureControls = el(HTMLElement, 'selected-picture-controls');
   const selectedPictureWidth = el(HTMLInputElement, 'selected-picture-width');
   const selectedPictureHeight = el(HTMLInputElement, 'selected-picture-height');
   const selectedPictureDelete = el(HTMLButtonElement, 'selected-picture-delete');
   const selectedPictureClone = el(HTMLButtonElement, 'selected-picture-clone');
+
   const controlsAutoLayout = el(HTMLInputElement, 'auto-layout-input');
   const controlsSnapToGrid = el(HTMLInputElement, 'snap-to-grid-input');
   const controlsGridSize = el(HTMLInputElement, 'grid-size-input');
@@ -212,6 +222,22 @@ export async function init() {
         dirty = true;
       })().catch((error) => console.error(error));
     }
+  });
+
+  layoutClusterButton.addEventListener('click', () => {
+    layoutCluster(state);
+    handleStateUpdated();
+    save();
+    dirty = true;
+    redraw({ canvas, state, view });
+  });
+
+  layoutHrailButton.addEventListener('click', () => {
+    layoutHorizontalRail(state);
+    handleStateUpdated();
+    save();
+    dirty = true;
+    redraw({ canvas, state, view });
   });
 
   exportBomButton.addEventListener('click', () => {
