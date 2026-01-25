@@ -224,11 +224,22 @@ input {
 
   display: flex;
   flex-direction: row;
+  align-items: center;
 
   &:hover {
     background: light-dark(#00000010, #ffffff10);
     transition: none;
   }
+}
+
+.menu-item__icon {
+  height: 24px;
+  margin-right: 8px;
+}
+
+.menu-item__text {
+  flex: 1;
+  text-align: left;
 }
 
 .menu-divider {
@@ -246,14 +257,4 @@ input {
     height: 1px;
     background: light-dark(#00000090, #ffffff90);
   }
-}
-
-.menu-item__icon {
-  height: 16px;
-  margin-right: 8px;
-}
-
-.menu-item__text {
-  flex: 1;
-  text-align: left;
 }
