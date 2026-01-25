@@ -230,27 +230,30 @@ export async function init() {
   });
 
   layoutClusterButton.addEventListener('click', () => {
-    layoutCluster(state, view);
-    handleStateUpdated();
-    save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
+    layoutCluster(state, view).then(() => {
+      handleStateUpdated();
+      save();
+      view.dirty = true;
+      redraw({ canvas, state, view });
+    });
   });
 
   layoutHrailButton.addEventListener('click', () => {
-    layoutHorizontalRail(state, view);
-    handleStateUpdated();
-    save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
+    layoutHorizontalRail(state, view).then(() => {
+      handleStateUpdated();
+      save();
+      view.dirty = true;
+      redraw({ canvas, state, view });
+    });
   });
 
   layoutVrailButton.addEventListener('click', () => {
-    layoutVerticalRail(state, view);
-    handleStateUpdated();
-    save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
+    layoutVerticalRail(state, view).then(() => {
+      handleStateUpdated();
+      save();
+      view.dirty = true;
+      redraw({ canvas, state, view });
+    });
   });
 
   exportBomButton.addEventListener('click', () => {
