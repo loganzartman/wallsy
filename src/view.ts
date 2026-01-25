@@ -1,6 +1,7 @@
 import type { Picture } from './picture';
 
 export type View = {
+  dirty: boolean;
   pan: [number, number];
   scale: number;
 
@@ -15,6 +16,7 @@ export type View = {
 export function emptyView(view?: View): View {
   if (!view) {
     return {
+      dirty: true,
       pan: [0, 0],
       scale: 20,
 
@@ -27,6 +29,7 @@ export function emptyView(view?: View): View {
     };
   }
 
+  view.dirty = true;
   view.pan = [0, 0];
   view.scale = 1;
   view.selectedPicture = null;
@@ -38,12 +41,14 @@ export function emptyView(view?: View): View {
 }
 
 export function clearMeasure(view: View) {
+  view.dirty = true;
   view.measuring = null;
   view.measureFrom = null;
   view.measureTo = null;
 }
 
 export function startMeasure(view: View) {
+  view.dirty = true;
   view.measuring = 'first';
   view.measureFrom = null;
   view.measureTo = null;

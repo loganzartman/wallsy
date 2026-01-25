@@ -56,19 +56,56 @@
       <div>+ add pictures</div>
     </div>
     <div id="controls" class="controls">
-      <label class="label">
-        <span>separate items</span>
-        <input type="checkbox" id="auto-layout-input" />
-      </label>
-      <label class="label">
-        <span>snap to grid</span>
-        <input type="checkbox" id="snap-to-grid-input" checked />
-      </label>
-      <label class="label">
-        <span>grid spacing</span>
-        <input type="number" id="grid-size-input" value="1" />
-      </label>
-      <button id="clear-button" class="button button--action button--destructive">clear</button>
+      <button popovertarget="layout-popover" class="layout-menu-button button button--action">layout</button>
+      <div id="layout-popover" popover="auto" class="layout-menu-popover">
+        <div class="menu layout-menu-popover__content">
+          <label class="label label--quiet">
+            <span class="label__text">separate items</span>
+            <input type="checkbox" id="auto-layout-input" class="label__input" />
+          </label>
+          <label class="label label--quiet">
+            <span class="label__text">snap to grid</span>
+            <input type="checkbox" id="snap-to-grid-input" checked class="label__input" />
+          </label>
+          <label class="label label--quiet">
+            <span class="label__text">grid spacing</span>
+            <input type="number" id="grid-size-input" value="1" class="label__input" />
+          </label>
+          <div class="menu-divider">auto-layout</div>
+          <button
+            id="layout-cluster-button"
+            popovertarget="layout-popover"
+            popovertargetaction="hide"
+            class="menu-item"
+          >
+            <svg class="menu-item__icon" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <use xlink:href="./icon/cluster.svg" />
+            </svg>
+            <div class="menu-item__text">cluster</div>
+          </button>
+          <!-- <button id="layout-grid-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
+            <div class="menu-item__text">grid</div>
+          </button>
+          <button id="layout-row-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
+            <div class="menu-item__text">row</div>
+          </button>
+          <button id="layout-column-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
+            <div class="menu-item__text">column</div>
+          </button> -->
+          <button id="layout-hrail-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
+            <svg class="menu-item__icon" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <use xlink:href="./icon/horizontal-rail.svg" />
+            </svg>
+            <div class="menu-item__text">horizontal rail</div>
+          </button>
+          <button id="layout-vrail-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
+            <svg class="menu-item__icon" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <use xlink:href="./icon/vertical-rail.svg" />
+            </svg>
+            <div class="menu-item__text">vertical rail</div>
+          </button>
+        </div>
+      </div>
       <button popovertarget="export-popover" class="export-menu-button button button--action">export</button>
       <div id="export-popover" popover="auto" class="export-menu-popover">
         <div class="menu export-menu-popover__content">
@@ -80,6 +117,7 @@
           </button>
         </div>
       </div>
+      <button id="clear-button" class="button button--action button--destructive">clear</button>
     </div>
     <script type="module" src="index.ts"></script>
   </body>
