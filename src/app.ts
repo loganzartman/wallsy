@@ -1,4 +1,4 @@
-import { clearState, loadState, storeState } from './db';
+import { loadState, storeState } from './db';
 import { debounce } from './debounce';
 import {
   applyForces,
@@ -221,9 +221,9 @@ export async function init() {
     if (confirm('Really clear everything?')) {
       (async () => {
         handleSelect(null);
-        await clearState();
         emptyState(state);
         handleStateUpdated();
+        save();
         view.dirty = true;
       })().catch((error) => console.error(error));
     }
@@ -294,7 +294,12 @@ export async function init() {
       return;
     }
 
-    const picture = hitTest(state.pictures, windowToWorld(view, [e.clientX, e.clientY]));
+    const picture = hitTest({
+      pictures: state.pictures,
+      library: state.library,
+      pos: windowToWorld(view, [e.clientX, e.clientY]),
+    });
+
     if (!picture) {
       handleSelect(null);
 
@@ -360,7 +365,8 @@ export async function init() {
     }
 
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
-    const hoveredPicture = e.target === canvas ? hitTest(state.pictures, worldPos) : null;
+    const hoveredPicture =
+      e.target === canvas ? hitTest({ pictures: state.pictures, library: state.library, pos: worldPos }) : null;
     if (hoveredPicture !== view.hoveredPicture) {
       view.hoveredPicture = hoveredPicture;
       view.dirty = true;
@@ -431,13 +437,28 @@ export async function init() {
       for (const file of files) {
         const bitmap = await createImageBitmap(file);
         const size: [number, number] = [14, 11];
+
+        // enforce filename uniqueness
+        const [, basename, extension = ''] = /^(.+)\.([^.]+)$/.exec(file.name) ?? [file.name];
+        let name = file.name;
+        let i = 0;
+        while (state.library.has(name)) {
+          name = `${basename} (${++i}).${extension}`;
+        }
+        const updatedFile = new File([file], name, file);
+
         state.pictures.push({
-          name: file.name,
+          name,
           pos: [pos[0], pos[1]],
           size,
-          blob: file,
+        });
+
+        state.library.set(name, {
+          name,
+          blob: updatedFile,
           bitmap,
         });
+
         pos[0] += 1;
         pos[1] += 1;
       }
@@ -476,14 +497,18 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
   ctx.setTransform(matrix);
 
   for (const picture of state.pictures) {
-    const dimensions = crop(picture);
+    const bitmap = state.library.get(picture.name)?.bitmap;
+    if (!bitmap) {
+      throw new Error(`Library image ${picture.name} not found`);
+    }
+    const dimensions = crop({ picture, library: state.library });
 
     ctx.save();
     ctx.shadowBlur = 1 / pixelSize;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 4;
-    ctx.drawImage(picture.bitmap, ...dimensions);
+    ctx.drawImage(bitmap, ...dimensions);
     ctx.restore();
 
     if (view.selectedPicture === picture) {

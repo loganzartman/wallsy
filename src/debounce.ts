@@ -2,6 +2,6 @@ export function debounce<T extends (...args: any[]) => void>(func: T, delay: num
   let timeout: number;
   return ((...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
+    timeout = setTimeout(() => func(...args), delay);
   }) as T;
 }

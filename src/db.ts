@@ -1,12 +1,27 @@
-import { type IDBPDatabase, openDB } from 'idb';
-import type { State } from './state';
+import { type DBSchema, type IDBPDatabase, openDB } from 'idb';
+import type { State, StoredState } from './state';
 
-let db: IDBPDatabase;
-async function getDB(): Promise<IDBPDatabase> {
+interface Schema extends DBSchema {
+  state: {
+    key: string;
+    value: StoredState;
+  };
+}
+
+let db: IDBPDatabase<Schema>;
+async function getDB(): Promise<IDBPDatabase<Schema>> {
   if (!db) {
-    db = await openDB('db', 1, {
-      upgrade(db) {
-        db.createObjectStore('state');
+    db = await openDB('db', 2, {
+      upgrade(db, oldVersion, newVersion, tx) {
+        console.log('db upgrade', oldVersion, newVersion);
+        if (!oldVersion) {
+          db.createObjectStore('state');
+        }
+        // pre-release versions
+        if (oldVersion <= 1) {
+          console.log('upgrading from pre-release version');
+          tx.objectStore('state').clear();
+        }
       },
     });
   }
@@ -20,10 +35,12 @@ export async function storeState(state: State): Promise<void> {
   await tx.store.put(
     {
       ...state,
-      pictures: state.pictures.map((picture) => {
-        const { bitmap: _omitted, ...rest } = picture;
-        return rest;
-      }),
+      library: new Map(
+        [...state.library.entries()].map(([k, v]) => {
+          const { bitmap: _omitted, ...rest } = v;
+          return [k, rest];
+        }),
+      ),
     },
     'app-state',
   );
@@ -40,20 +57,12 @@ export async function loadState(): Promise<State | null> {
 
   return {
     ...stored,
-    pictures: await Promise.all(
-      stored.pictures.map(async (picture) => {
-        return {
-          ...picture,
-          bitmap: await createImageBitmap(picture.blob),
-        };
-      }),
+    library: new Map(
+      await Promise.all(
+        [...stored.library.entries()].map(async ([k, v]) => {
+          return [k, { ...v, bitmap: await createImageBitmap(v.blob) }] as const;
+        }),
+      ),
     ),
   };
-}
-
-export async function clearState(): Promise<void> {
-  const db = await getDB();
-  const tx = await db.transaction('state', 'readwrite');
-  await tx.store.clear();
-  await tx.done;
 }
