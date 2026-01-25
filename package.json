@@ -9,8 +9,10 @@
   "scripts": {
     "dev": "parcel",
     "build": "parcel build",
+    "types": "tsgo --noEmit",
     "lint": "oxlint && oxfmt",
-    "lint:fix": "oxlint --fix && oxfmt --fix"
+    "lint:fix": "oxlint --fix && oxfmt --fix",
+    "check": "pnpm lint && pnpm types && pnpm build"
   },
   "dependencies": {
     "fflate": "^0.8.2",
@@ -18,6 +20,7 @@
     "parcel": "^2.16.3"
   },
   "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260124.1",
     "oxfmt": "^0.24.0",
     "oxlint": "^1.39.0"
   },
