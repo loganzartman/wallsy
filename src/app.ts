@@ -306,6 +306,8 @@ export async function init() {
       panning = true;
       panOffset = [e.clientX, e.clientY];
 
+      view.dirty = true;
+      redraw({ canvas, state, view });
       return;
     }
 
@@ -518,13 +520,19 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 8 * pixelSize;
       ctx.stroke();
-      ctx.strokeStyle = '#31a7f3';
+      ctx.strokeStyle = 'white';
       ctx.lineWidth = 3 * pixelSize;
       ctx.stroke();
     } else if (view.hoveredPicture === picture) {
       const [_sx, _sy, _sw, _sh, dx, dy, dw, dh] = dimensions;
-      ctx.fillStyle = '#31a7f340';
-      ctx.fillRect(dx, dy, dw, dh);
+      ctx.beginPath();
+      ctx.roundRect(dx, dy, dw, dh, 4 * pixelSize);
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 8 * pixelSize;
+      ctx.stroke();
+      ctx.strokeStyle = '#31a7f3';
+      ctx.lineWidth = 3 * pixelSize;
+      ctx.stroke();
     }
   }
 

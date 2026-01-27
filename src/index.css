@@ -65,12 +65,17 @@ input {
   height: 100%;
 }
 
+.label-group {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+}
+
 .label {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 
   overflow: hidden;
   padding: 4px 12px;
@@ -82,6 +87,12 @@ input {
   backdrop-filter: blur(8px) saturate(2);
 }
 
+.label-group .label {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
 .label--quiet {
   border: none;
   background: none;
@@ -89,22 +100,16 @@ input {
 }
 
 .label__text {
-  flex-basis: 0;
-  flex-grow: 2;
+  flex-grow: 0;
   flex-shrink: 0;
 }
 
 .label__input {
-  flex-basis: 32px;
-  flex-grow: 1;
-  flex-shrink: 1;
-
-  &[type='checkbox'] {
-    flex-grow: 0;
-  }
+  justify-self: end;
 
   &[type='number'] {
     text-align: right;
+    max-width: 96px;
   }
 }
 
@@ -116,7 +121,6 @@ input {
   display: flex;
   gap: 8px;
 
-  width: 300px;
   border: 1px solid light-dark(#00000030, #ffffff30);
   background: light-dark(#dddddda0, #222222a0);
   backdrop-filter: blur(2px) saturate(2);
