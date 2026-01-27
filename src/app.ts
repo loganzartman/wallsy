@@ -99,6 +99,13 @@ export async function init() {
   }
 
   document.addEventListener('keydown', (e) => {
+    if (e.target instanceof HTMLInputElement) {
+      if (e.key === 'Escape') {
+        e.target.blur();
+      }
+      return;
+    }
+
     if (e.key === 'Escape') {
       clearMeasure(view);
       handleSelect(null);
@@ -116,6 +123,7 @@ export async function init() {
     if (!targetPicture) {
       return;
     }
+
     if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'x') {
       state.pictures = state.pictures.filter((p) => p !== targetPicture);
       handleStateUpdated();
@@ -138,7 +146,7 @@ export async function init() {
     }
   });
 
-  selectedPictureWidth.addEventListener('change', () => {
+  selectedPictureWidth.addEventListener('input', () => {
     if (!view.selectedPicture) {
       return;
     }
@@ -155,7 +163,7 @@ export async function init() {
     handleSelect(view.selectedPicture);
   });
 
-  selectedPictureHeight.addEventListener('change', () => {
+  selectedPictureHeight.addEventListener('input', () => {
     if (!view.selectedPicture) {
       return;
     }
@@ -211,7 +219,7 @@ export async function init() {
     isSnapToGrid = controlsSnapToGrid.checked;
   });
 
-  controlsGridSize.addEventListener('change', () => {
+  controlsGridSize.addEventListener('input', () => {
     state.gridSize = Number.parseInt(controlsGridSize.value);
     handleStateUpdated();
     save();
@@ -306,6 +314,8 @@ export async function init() {
       panning = true;
       panOffset = [e.clientX, e.clientY];
 
+      view.dirty = true;
+      redraw({ canvas, state, view });
       return;
     }
 
@@ -380,7 +390,9 @@ export async function init() {
   });
 
   document.addEventListener('wheel', (e) => {
-    e.preventDefault();
+    if (e.target !== canvas) {
+      return;
+    }
 
     // Get world position under cursor before zoom
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
@@ -518,13 +530,19 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 8 * pixelSize;
       ctx.stroke();
-      ctx.strokeStyle = '#31a7f3';
+      ctx.strokeStyle = 'white';
       ctx.lineWidth = 3 * pixelSize;
       ctx.stroke();
     } else if (view.hoveredPicture === picture) {
       const [_sx, _sy, _sw, _sh, dx, dy, dw, dh] = dimensions;
-      ctx.fillStyle = '#31a7f340';
-      ctx.fillRect(dx, dy, dw, dh);
+      ctx.beginPath();
+      ctx.roundRect(dx, dy, dw, dh, 4 * pixelSize);
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 8 * pixelSize;
+      ctx.stroke();
+      ctx.strokeStyle = '#31a7f3';
+      ctx.lineWidth = 3 * pixelSize;
+      ctx.stroke();
     }
   }
 
