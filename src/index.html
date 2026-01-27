@@ -11,32 +11,34 @@
           <span class="label__text">w</span>
           <input
             class="label__input"
-            style="width: 48px"
+            style="width: 60px"
             id="selected-picture-width"
             type="number"
             min="1"
             max="9999"
+            step="any"
           />
         </label>
         <label class="label">
           <span class="label__text">h</span>
           <input
             class="label__input"
-            style="width: 48px"
+            style="width: 60px"
             id="selected-picture-height"
             type="number"
             min="1"
             max="9999"
+            step="any"
           />
         </label>
       </div>
       <button id="selected-picture-delete" class="button button--action button--destructive">
-        <svg class="button__icon" viewBox="0 0 24 24">
+        <svg class="button__icon" viewBox="0 0 24 24" alt="delete selected picture">
           <use xlink:href="./icon/trash.svg" />
         </svg>
       </button>
       <button id="selected-picture-clone" class="button button--action">
-        <svg class="button__icon" viewBox="0 0 24 24">
+        <svg class="button__icon" viewBox="0 0 24 24" alt="clone selected picture">
           <use xlink:href="./icon/clone.svg" />
         </svg>
       </button>
@@ -62,7 +64,15 @@
             </label>
             <label class="label label--quiet">
               <span class="label__text">grid spacing</span>
-              <input type="number" id="grid-size-input" value="1" class="label__input" min="0.1" max="9999" />
+              <input
+                type="number"
+                id="grid-size-input"
+                value="1"
+                class="label__input"
+                min="0.1"
+                max="9999"
+                step="any"
+              />
             </label>
           </div>
           <div class="menu-divider">auto-layout</div>
@@ -72,7 +82,7 @@
             popovertargetaction="hide"
             class="menu-item"
           >
-            <svg class="menu-item__icon" viewBox="0 0 48 48">
+            <svg class="menu-item__icon" viewBox="0 0 48 48" alt="items arranged in one cluster">
               <use xlink:href="./icon/cluster.svg" />
             </svg>
             <div class="menu-item__text">cluster</div>
@@ -87,13 +97,13 @@
             <div class="menu-item__text">column</div>
           </button> -->
           <button id="layout-hrail-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
-            <svg class="menu-item__icon" viewBox="0 0 48 48">
+            <svg class="menu-item__icon" viewBox="0 0 48 48" alt="items arranged horizontally">
               <use xlink:href="./icon/horizontal-rail.svg" />
             </svg>
             <div class="menu-item__text">horizontal rail</div>
           </button>
           <button id="layout-vrail-button" popovertarget="layout-popover" popovertargetaction="hide" class="menu-item">
-            <svg class="menu-item__icon" viewBox="0 0 48 48">
+            <svg class="menu-item__icon" viewBox="0 0 48 48" alt="items arranged vertically">
               <use xlink:href="./icon/vertical-rail.svg" />
             </svg>
             <div class="menu-item__text">vertical rail</div>
