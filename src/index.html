@@ -9,11 +9,25 @@
       <div id="selected-picture-size" class="pic-controls__size">
         <label class="label">
           <span class="label__text">w</span>
-          <input class="label__input" style="width: 48px" id="selected-picture-width" type="number" />
+          <input
+            class="label__input"
+            style="width: 48px"
+            id="selected-picture-width"
+            type="number"
+            min="1"
+            max="9999"
+          />
         </label>
         <label class="label">
           <span class="label__text">h</span>
-          <input class="label__input" style="width: 48px" id="selected-picture-height" type="number" />
+          <input
+            class="label__input"
+            style="width: 48px"
+            id="selected-picture-height"
+            type="number"
+            min="1"
+            max="9999"
+          />
         </label>
       </div>
       <button id="selected-picture-delete" class="button button--action button--destructive">
@@ -48,7 +62,7 @@
             </label>
             <label class="label label--quiet">
               <span class="label__text">grid spacing</span>
-              <input type="number" id="grid-size-input" value="1" class="label__input" />
+              <input type="number" id="grid-size-input" value="1" class="label__input" min="0.1" max="9999" />
             </label>
           </div>
           <div class="menu-divider">auto-layout</div>
