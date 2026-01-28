@@ -31,6 +31,9 @@ export async function init() {
   const selectedPictureHeight = el(HTMLInputElement, 'selected-picture-height');
   const selectedPictureDelete = el(HTMLButtonElement, 'selected-picture-delete');
   const selectedPictureClone = el(HTMLButtonElement, 'selected-picture-clone');
+  const selectedPictureSizeHotbar = el(HTMLElement, 'selected-picture-size-hotbar');
+  const selectedPictureSizeHotbarTemplate = el(HTMLTemplateElement, 'selected-picture-size-hotbar-template');
+  const selectedPictureFlip = el(HTMLButtonElement, 'selected-picture-flip');
 
   const controlsAutoLayout = el(HTMLInputElement, 'auto-layout-input');
   const controlsSnapToGrid = el(HTMLInputElement, 'snap-to-grid-input');
@@ -47,12 +50,66 @@ export async function init() {
   let panning = false;
   let panOffset: [number, number] = [0, 0];
 
+  function renderPictureSizeHotbar() {
+    selectedPictureSizeHotbar.innerHTML = '';
+    if (!view.selectedPicture) {
+      return;
+    }
+
+    const smallestFirst = view.selectedPicture.size[0] < view.selectedPicture.size[1];
+    const countBySize = new Map<string, number>();
+    for (const picture of state.pictures) {
+      const smallest = Math.min(picture.size[0], picture.size[1]);
+      const largest = Math.max(picture.size[0], picture.size[1]);
+      const size = `${smallestFirst ? smallest : largest}x${smallestFirst ? largest : smallest}`;
+      countBySize.set(size, (countBySize.get(size) ?? 0) + 1);
+    }
+    const sizes = Array.from(countBySize.entries())
+      .sort(([, countA], [, countB]) => countB - countA)
+      .slice(0, 5);
+
+    for (const [size] of sizes) {
+      const [width, height] = size.split('x').map(Number.parseFloat);
+      const clone = document.importNode(selectedPictureSizeHotbarTemplate.content, true);
+
+      const button = clone.querySelector('button');
+      if (!button) {
+        throw new Error('Button not found');
+      }
+      button.addEventListener('click', () => {
+        if (!view.selectedPicture) {
+          return;
+        }
+        view.selectedPicture.size = [width, height];
+        handleSelect(view.selectedPicture);
+        handleStateUpdated();
+        view.dirty = true;
+        save();
+      });
+
+      const widthElement = clone.querySelector('.hotbar-item__width');
+      const separatorElement = clone.querySelector('.hotbar-item__separator');
+      const heightElement = clone.querySelector('.hotbar-item__height');
+
+      if (!widthElement || !separatorElement || !heightElement) {
+        throw new Error('Button not found');
+      }
+
+      (widthElement as HTMLElement).innerText = width.toString();
+      (separatorElement as HTMLElement).innerText = 'x';
+      (heightElement as HTMLElement).innerText = height.toString();
+
+      selectedPictureSizeHotbar.appendChild(clone);
+    }
+  }
+
   function handleStateUpdated() {
     if (state.pictures.length === 0) {
       emptyOverlay.style.opacity = '1';
     } else {
       emptyOverlay.style.opacity = '0';
     }
+    renderPictureSizeHotbar();
   }
   handleStateUpdated();
 
@@ -96,6 +153,8 @@ export async function init() {
     selectedPictureControls.classList.add('visible');
     selectedPictureControls.style.left = `${left}px`;
     selectedPictureControls.style.top = `${top}px`;
+
+    renderPictureSizeHotbar();
   }
 
   document.addEventListener('keydown', (e) => {
@@ -198,8 +257,8 @@ export async function init() {
     }
 
     const newPicture = {
-      ...view.selectedPicture,
-      pos: [view.selectedPicture.pos[0] + 1, view.selectedPicture.pos[1] + 1],
+      ...structuredClone(view.selectedPicture),
+      pos: [view.selectedPicture.pos[0] + 1, view.selectedPicture.pos[1] - 1],
     } satisfies Picture;
 
     state.pictures.push(newPicture);
@@ -209,6 +268,17 @@ export async function init() {
     save();
     view.dirty = true;
     redraw({ canvas, state, view });
+  });
+
+  selectedPictureFlip.addEventListener('click', () => {
+    if (!view.selectedPicture) {
+      return;
+    }
+    view.selectedPicture.size = [view.selectedPicture.size[1], view.selectedPicture.size[0]];
+    handleSelect(view.selectedPicture);
+    handleStateUpdated();
+    save();
+    view.dirty = true;
   });
 
   controlsAutoLayout.addEventListener('change', () => {

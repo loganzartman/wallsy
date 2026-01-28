@@ -6,42 +6,63 @@
   <body>
     <canvas id="canvas" class="canvas"></canvas>
     <div id="selected-picture-controls" class="pic-controls">
-      <div id="selected-picture-size" class="pic-controls__size">
-        <label class="label">
-          <span class="label__text">w</span>
-          <input
-            class="label__input"
-            style="width: 60px"
-            id="selected-picture-width"
-            type="number"
-            min="1"
-            max="9999"
-            step="any"
-          />
-        </label>
-        <label class="label">
-          <span class="label__text">h</span>
-          <input
-            class="label__input"
-            style="width: 60px"
-            id="selected-picture-height"
-            type="number"
-            min="1"
-            max="9999"
-            step="any"
-          />
-        </label>
+      <div class="pic-controls__row">
+        <div id="selected-picture-size" class="pic-controls__size">
+          <label class="label">
+            <span class="label__text">w</span>
+            <input
+              class="label__input"
+              style="width: 60px"
+              id="selected-picture-width"
+              type="number"
+              min="1"
+              max="9999"
+              step="any"
+            />
+          </label>
+          <label class="label">
+            <span class="label__text">h</span>
+            <input
+              class="label__input"
+              style="width: 60px"
+              id="selected-picture-height"
+              type="number"
+              min="1"
+              max="9999"
+              step="any"
+            />
+          </label>
+        </div>
+        <div class="pic-controls__actions">
+          <button id="selected-picture-delete" class="button button--action button--destructive">
+            <svg class="button__icon" viewBox="0 0 24 24" alt="delete selected picture">
+              <use xlink:href="./icon/trash.svg" />
+            </svg>
+          </button>
+          <button id="selected-picture-clone" class="button button--action">
+            <svg class="button__icon" viewBox="0 0 24 24" alt="clone selected picture">
+              <use xlink:href="./icon/clone.svg" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <button id="selected-picture-delete" class="button button--action button--destructive">
-        <svg class="button__icon" viewBox="0 0 24 24" alt="delete selected picture">
-          <use xlink:href="./icon/trash.svg" />
-        </svg>
-      </button>
-      <button id="selected-picture-clone" class="button button--action">
-        <svg class="button__icon" viewBox="0 0 24 24" alt="clone selected picture">
-          <use xlink:href="./icon/clone.svg" />
-        </svg>
-      </button>
+      <div class="pic-controls__row pic-controls__row--between">
+        <template id="selected-picture-size-hotbar-template">
+          <button class="button button--action button--quiet">
+            <div class="button__text hotbar-item">
+              <div class="hotbar-item__width">w</div>
+              <div class="hotbar-item__separator">x</div>
+              <div class="hotbar-item__height">h</div>
+            </div>
+          </button>
+        </template>
+        <div id="selected-picture-size-hotbar"></div>
+        <button id="selected-picture-flip" class="button button--action">
+          <svg class="button__icon" viewBox="0 0 24 24" alt="swap width and height (portrait or landscape)">
+            <use xlink:href="./icon/rotate.svg" />
+          </svg>
+        </button>
+      </div>
     </div>
     <div id="empty-overlay" class="overlay">
       <div>drag and drop to add pictures</div>
