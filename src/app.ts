@@ -92,7 +92,7 @@ export async function init() {
       const heightElement = clone.querySelector('.hotbar-item__height');
 
       if (!widthElement || !separatorElement || !heightElement) {
-        throw new Error('Button not found');
+        throw new Error('Hotbar item elements not found');
       }
 
       (widthElement as HTMLElement).innerText = width.toString();
