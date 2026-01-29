@@ -10,7 +10,7 @@ import {
   snapToGrid,
 } from './layout';
 import { crop, hitTest, type Picture } from './picture';
-import { emptyState, generateManifest, generatePicturesZip, moveToTop, type State } from './state';
+import { createStateHistory, emptyState, generateManifest, generatePicturesZip, moveToTop, type State } from './state';
 import { clearMeasure, emptyView, getMatrix, startMeasure, windowToWorld, worldToWindow, type View } from './view';
 
 export async function init() {
@@ -40,6 +40,7 @@ export async function init() {
   const controlsGridSize = el(HTMLInputElement, 'grid-size-input');
 
   const state = (await loadState()) ?? emptyState();
+  const history = createStateHistory(state);
   const view = emptyView();
 
   let isAutoLayout = controlsAutoLayout.checked;
@@ -110,6 +111,8 @@ export async function init() {
       emptyOverlay.style.opacity = '0';
     }
     renderPictureSizeHotbar();
+    view.dirty = true;
+    redraw({ canvas, state, view });
   }
   handleStateUpdated();
 
@@ -134,6 +137,7 @@ export async function init() {
   resize({ canvas, state, view });
 
   const save = debounce(() => {
+    history.pushState();
     storeState(state).catch((error) => console.error(error));
   }, 500);
 
@@ -165,16 +169,31 @@ export async function init() {
       return;
     }
 
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
+      history.undo();
+      handleStateUpdated();
+      storeState(state).catch((error) => console.error(error));
+      return;
+    }
+
+    if (
+      ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'y') ||
+      ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')
+    ) {
+      history.redo();
+      handleStateUpdated();
+      storeState(state).catch((error) => console.error(error));
+      return;
+    }
+
     if (e.key === 'Escape') {
       clearMeasure(view);
       handleSelect(null);
-      view.dirty = true;
       return;
     }
     if (e.key === 'm') {
       startMeasure(view);
       handleSelect(null);
-      view.dirty = true;
       return;
     }
 
@@ -188,7 +207,6 @@ export async function init() {
       handleStateUpdated();
       handleSelect(null);
       save();
-      view.dirty = true;
       return;
     }
     if (e.key === 'd') {
@@ -200,7 +218,6 @@ export async function init() {
       handleStateUpdated();
       handleSelect(newPicture);
       save();
-      view.dirty = true;
       return;
     }
   });
@@ -216,9 +233,8 @@ export async function init() {
     }
 
     view.selectedPicture.size[0] = value;
+    handleStateUpdated();
     save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
     handleSelect(view.selectedPicture);
   });
 
@@ -233,9 +249,9 @@ export async function init() {
     }
 
     view.selectedPicture.size[1] = value;
+    handleStateUpdated();
     save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
+    handleSelect(view.selectedPicture);
   });
 
   selectedPictureDelete.addEventListener('click', () => {
@@ -247,8 +263,6 @@ export async function init() {
     state.pictures = state.pictures.filter((p) => p !== picture);
     handleStateUpdated();
     save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
   });
 
   selectedPictureClone.addEventListener('click', () => {
@@ -264,10 +278,8 @@ export async function init() {
     state.pictures.push(newPicture);
     handleStateUpdated();
     handleSelect(newPicture);
-
+    handleStateUpdated();
     save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
   });
 
   selectedPictureFlip.addEventListener('click', () => {
@@ -302,7 +314,6 @@ export async function init() {
         emptyState(state);
         handleStateUpdated();
         save();
-        view.dirty = true;
       })().catch((error) => console.error(error));
     }
   });
@@ -311,8 +322,6 @@ export async function init() {
     layoutCluster(state, view).then(() => {
       handleStateUpdated();
       save();
-      view.dirty = true;
-      redraw({ canvas, state, view });
     });
   });
 
@@ -320,8 +329,6 @@ export async function init() {
     layoutHorizontalRail(state, view).then(() => {
       handleStateUpdated();
       save();
-      view.dirty = true;
-      redraw({ canvas, state, view });
     });
   });
 
@@ -329,8 +336,6 @@ export async function init() {
     layoutVerticalRail(state, view).then(() => {
       handleStateUpdated();
       save();
-      view.dirty = true;
-      redraw({ canvas, state, view });
     });
   });
 
@@ -368,7 +373,6 @@ export async function init() {
         view.measuring = 'done';
       }
       view.dirty = true;
-      redraw({ canvas, state, view });
       return;
     }
 
@@ -385,7 +389,6 @@ export async function init() {
       panOffset = [e.clientX, e.clientY];
 
       view.dirty = true;
-      redraw({ canvas, state, view });
       return;
     }
 
@@ -394,9 +397,8 @@ export async function init() {
     handleSelect(picture);
     const worldPos = windowToWorld(view, [e.clientX, e.clientY]);
     dragOffset = [worldPos[0] - picture.pos[0], worldPos[1] - picture.pos[1]];
+    handleStateUpdated();
     save();
-    view.dirty = true;
-    redraw({ canvas, state, view });
   });
 
   document.addEventListener('pointermove', (e) => {
@@ -423,9 +425,7 @@ export async function init() {
       }
 
       handleSelect(draggingPicture);
-      save();
-      view.dirty = true;
-      redraw({ canvas, state, view });
+      handleStateUpdated();
       return;
     }
 
@@ -455,6 +455,9 @@ export async function init() {
   });
 
   document.addEventListener('pointerup', () => {
+    if (draggingPicture) {
+      save();
+    }
     draggingPicture = null;
     panning = false;
   });
@@ -544,7 +547,6 @@ export async function init() {
         pos[0] += 1;
         pos[1] += 1;
       }
-      view.dirty = true;
       handleStateUpdated();
       save();
     })().catch((error) => console.error(error));

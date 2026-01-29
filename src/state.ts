@@ -40,6 +40,65 @@ export function moveToTop(state: State, picture: Picture) {
   }
 }
 
+export function createStateHistory(state: State) {
+  const MAX_COUNT = 32;
+  let current = structuredClone(state.pictures);
+  const undoStack: Picture[][] = [];
+  const redoStack: Picture[][] = [];
+
+  const gcLibrary = () => {
+    const allNames = new Set<string>(undoStack.flatMap((snapshot) => snapshot.map((p) => p.name)));
+    for (const name of state.library.keys()) {
+      if (!allNames.has(name)) {
+        state.library.delete(name);
+      }
+    }
+  };
+
+  const pushState = () => {
+    if (JSON.stringify(current) === JSON.stringify(state.pictures)) {
+      return;
+    }
+
+    undoStack.push(current);
+    current = structuredClone(state.pictures);
+    redoStack.length = 0;
+
+    while (undoStack.length > MAX_COUNT) {
+      undoStack.shift();
+    }
+    gcLibrary();
+  };
+
+  const undo = () => {
+    const prev = undoStack.pop();
+    if (!prev) {
+      return;
+    }
+
+    redoStack.push(current);
+    state.pictures = structuredClone(prev);
+    current = prev;
+  };
+
+  const redo = () => {
+    const next = redoStack.pop();
+    if (!next) {
+      return;
+    }
+
+    undoStack.push(current);
+    state.pictures = structuredClone(next);
+    current = next;
+  };
+
+  return {
+    pushState,
+    undo,
+    redo,
+  };
+}
+
 export function generateManifest(state: State): string {
   const countByDimensions = new Map<string, number>();
   for (const picture of state.pictures) {
