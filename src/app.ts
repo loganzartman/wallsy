@@ -83,9 +83,20 @@ export async function init() {
       const size = `${smallestFirst ? smallest : largest}x${smallestFirst ? largest : smallest}`;
       countBySize.set(size, (countBySize.get(size) ?? 0) + 1);
     }
+    // top 5 most used, sorted by area then perimeter
     const sizes = Array.from(countBySize.entries())
       .sort(([, countA], [, countB]) => countB - countA)
-      .slice(0, 5);
+      .slice(0, 5)
+      .sort(([sizeA], [sizeB]) => {
+        const [widthA, heightA] = sizeA.split('x').map(Number.parseFloat);
+        const [widthB, heightB] = sizeB.split('x').map(Number.parseFloat);
+        const areaA = widthA * heightA;
+        const areaB = widthB * heightB;
+        if (areaA !== areaB) {
+          return areaA - areaB;
+        }
+        return widthA + heightA - (widthB + heightB);
+      });
 
     for (const [size] of sizes) {
       const [width, height] = size.split('x').map(Number.parseFloat);

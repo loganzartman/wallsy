@@ -41,6 +41,11 @@ button {
 .button--quiet {
   border: none;
   background: none;
+  border: 1px solid transparent;
+
+  &:hover {
+    border-color: light-dark(#00000050, #ffffff50);
+  }
 }
 
 .button--destructive {
@@ -48,6 +53,10 @@ button {
   &:hover {
     background: light-dark(#c20, #c00);
   }
+}
+
+.button--compact {
+  padding: 10px 8px;
 }
 
 .button__icon {
