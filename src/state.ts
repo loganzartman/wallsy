@@ -47,7 +47,7 @@ export function createStateHistory(state: State) {
   const redoStack: Picture[][] = [];
 
   const gcLibrary = () => {
-    const allNames = new Set<string>(undoStack.flatMap((snapshot) => snapshot.map((p) => p.name)));
+    const allNames = new Set<string>([...undoStack, current].flatMap((snapshot) => snapshot.map((p) => p.name)));
     for (const name of state.library.keys()) {
       if (!allNames.has(name)) {
         state.library.delete(name);
