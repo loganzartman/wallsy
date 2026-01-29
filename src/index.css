@@ -241,6 +241,17 @@ input {
   left: anchor(left);
 }
 
+.view-menu-button {
+  anchor-name: --view-button;
+}
+
+.view-menu-popover__content {
+  position: fixed;
+  position-anchor: --view-button;
+  top: calc(anchor(bottom) + 8px);
+  left: anchor(left);
+}
+
 .export-menu-button {
   anchor-name: --export-button;
 }

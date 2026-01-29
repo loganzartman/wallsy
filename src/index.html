@@ -131,6 +131,15 @@
           </button>
         </div>
       </div>
+      <button popovertarget="view-popover" class="view-menu-button button button--action">view</button>
+      <div id="view-popover" popover="auto" class="view-menu-popover">
+        <div class="menu view-menu-popover__content">
+          <label class="label label--quiet">
+            <span class="label__text">trim/wrap edges</span>
+            <input type="number" id="trim-edges-input" value="0" class="label__input" min="0" max="9999" step="any" />
+          </label>
+        </div>
+      </div>
       <button popovertarget="export-popover" class="export-menu-button button button--action">export</button>
       <div id="export-popover" popover="auto" class="export-menu-popover">
         <div class="menu export-menu-popover__content">
