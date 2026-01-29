@@ -48,7 +48,7 @@
       </div>
       <div class="pic-controls__row pic-controls__row--between">
         <template id="selected-picture-size-hotbar-template">
-          <button class="button button--action button--quiet">
+          <button class="button button--action button--quiet button--compact">
             <div class="button__text hotbar-item">
               <div class="hotbar-item__width">w</div>
               <div class="hotbar-item__separator">x</div>
@@ -129,6 +129,15 @@
             </svg>
             <div class="menu-item__text">vertical rail</div>
           </button>
+        </div>
+      </div>
+      <button popovertarget="view-popover" class="view-menu-button button button--action">view</button>
+      <div id="view-popover" popover="auto" class="view-menu-popover">
+        <div class="menu view-menu-popover__content">
+          <label class="label label--quiet">
+            <span class="label__text">trim/wrap edges</span>
+            <input type="number" id="trim-edges-input" value="0" class="label__input" min="0" max="9999" step="any" />
+          </label>
         </div>
       </div>
       <button popovertarget="export-popover" class="export-menu-button button button--action">export</button>

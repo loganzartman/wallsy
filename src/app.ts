@@ -38,10 +38,14 @@ export async function init() {
   const controlsAutoLayout = el(HTMLInputElement, 'auto-layout-input');
   const controlsSnapToGrid = el(HTMLInputElement, 'snap-to-grid-input');
   const controlsGridSize = el(HTMLInputElement, 'grid-size-input');
+  const controlsTrimEdges = el(HTMLInputElement, 'trim-edges-input');
 
   const state = (await loadState()) ?? emptyState();
   const history = createStateHistory(state);
   const view = emptyView();
+
+  controlsGridSize.value = state.gridSize.toString();
+  controlsTrimEdges.value = state.trim.toString();
 
   let isAutoLayout = controlsAutoLayout.checked;
   let isSnapToGrid = controlsSnapToGrid.checked;
@@ -83,9 +87,20 @@ export async function init() {
       const size = `${smallestFirst ? smallest : largest}x${smallestFirst ? largest : smallest}`;
       countBySize.set(size, (countBySize.get(size) ?? 0) + 1);
     }
+    // top 5 most used, sorted by area then perimeter
     const sizes = Array.from(countBySize.entries())
       .sort(([, countA], [, countB]) => countB - countA)
-      .slice(0, 5);
+      .slice(0, 5)
+      .sort(([sizeA], [sizeB]) => {
+        const [widthA, heightA] = sizeA.split('x').map(Number.parseFloat);
+        const [widthB, heightB] = sizeB.split('x').map(Number.parseFloat);
+        const areaA = widthA * heightA;
+        const areaB = widthB * heightB;
+        if (areaA !== areaB) {
+          return areaA - areaB;
+        }
+        return widthA + heightA - (widthB + heightB);
+      });
 
     for (const [size] of sizes) {
       const [width, height] = size.split('x').map(Number.parseFloat);
@@ -309,6 +324,14 @@ export async function init() {
   controlsGridSize.addEventListener('input', () => {
     state.gridSize = Number.parseInt(controlsGridSize.value);
     handleStateUpdated();
+    save();
+  });
+
+  controlsTrimEdges.addEventListener('input', () => {
+    const value = Number.parseFloat(controlsTrimEdges.value);
+    state.trim = isNaN(value) || value < 0 ? 0 : value;
+    view.dirty = true;
+    redraw({ canvas, state, view });
     save();
   });
 
@@ -591,7 +614,7 @@ function redraw({ canvas, state, view }: { canvas: HTMLCanvasElement; state: Sta
     if (!bitmap) {
       throw new Error(`Library image ${picture.name} not found`);
     }
-    const dimensions = crop({ picture, library: state.library });
+    const dimensions = crop({ picture, library: state.library, trim: state.trim });
 
     ctx.save();
     ctx.shadowBlur = 1 / pixelSize;

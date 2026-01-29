@@ -12,6 +12,7 @@ export type StoredLibrary = Map<string, Omit<LibraryImage, 'bitmap'>>;
 
 export type State = {
   gridSize: number;
+  trim: number;
   library: Library;
   pictures: Picture[];
 };
@@ -22,11 +23,13 @@ export function emptyState(state?: State): State {
   if (!state) {
     return {
       gridSize: 1,
+      trim: 0,
       library: new Map(),
       pictures: [],
     };
   }
   state.gridSize = 1;
+  state.trim = 0;
   state.library = new Map();
   state.pictures = [];
   return state;
@@ -47,7 +50,7 @@ export function createStateHistory(state: State) {
   const redoStack: Picture[][] = [];
 
   const gcLibrary = () => {
-    const allNames = new Set<string>(undoStack.flatMap((snapshot) => snapshot.map((p) => p.name)));
+    const allNames = new Set<string>([...undoStack, current].flatMap((snapshot) => snapshot.map((p) => p.name)));
     for (const name of state.library.keys()) {
       if (!allNames.has(name)) {
         state.library.delete(name);
