@@ -51,6 +51,24 @@ export async function init() {
   let panning = false;
   let panOffset: [number, number] = [0, 0];
 
+  function renderSelectedPictureControls() {
+    if (!view.selectedPicture) {
+      selectedPictureControls.classList.remove('visible');
+      return;
+    }
+
+    selectedPictureWidth.value = view.selectedPicture.size[0].toString();
+    selectedPictureHeight.value = view.selectedPicture.size[1].toString();
+
+    const [left, top] = worldToWindow(view, [
+      view.selectedPicture.pos[0],
+      view.selectedPicture.pos[1] + view.selectedPicture.size[1] / 2,
+    ]);
+    selectedPictureControls.classList.add('visible');
+    selectedPictureControls.style.left = `${left}px`;
+    selectedPictureControls.style.top = `${top}px`;
+  }
+
   function renderPictureSizeHotbar() {
     selectedPictureSizeHotbar.innerHTML = '';
     if (!view.selectedPicture) {
@@ -110,6 +128,7 @@ export async function init() {
     } else {
       emptyOverlay.style.opacity = '0';
     }
+    renderSelectedPictureControls();
     renderPictureSizeHotbar();
     view.dirty = true;
     redraw({ canvas, state, view });
@@ -144,21 +163,6 @@ export async function init() {
   function handleSelect(picture: Picture | null) {
     view.selectedPicture = picture;
     view.hoveredPicture = null;
-
-    if (!picture) {
-      selectedPictureControls.classList.remove('visible');
-      return;
-    }
-
-    selectedPictureWidth.value = picture.size[0].toString();
-    selectedPictureHeight.value = picture.size[1].toString();
-
-    const [left, top] = worldToWindow(view, [picture.pos[0], picture.pos[1] + picture.size[1] / 2]);
-    selectedPictureControls.classList.add('visible');
-    selectedPictureControls.style.left = `${left}px`;
-    selectedPictureControls.style.top = `${top}px`;
-
-    renderPictureSizeHotbar();
   }
 
   document.addEventListener('keydown', (e) => {
@@ -171,6 +175,7 @@ export async function init() {
 
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
       history.undo();
+      handleSelect(null);
       handleStateUpdated();
       storeState(state).catch((error) => console.error(error));
       return;
@@ -181,6 +186,7 @@ export async function init() {
       ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')
     ) {
       history.redo();
+      handleSelect(null);
       handleStateUpdated();
       storeState(state).catch((error) => console.error(error));
       return;
@@ -204,8 +210,8 @@ export async function init() {
 
     if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'x') {
       state.pictures = state.pictures.filter((p) => p !== targetPicture);
-      handleStateUpdated();
       handleSelect(null);
+      handleStateUpdated();
       save();
       return;
     }
@@ -215,8 +221,8 @@ export async function init() {
         pos: [targetPicture.pos[0] + 1, targetPicture.pos[1] + 1],
       } satisfies Picture;
       state.pictures.push(newPicture);
-      handleStateUpdated();
       handleSelect(newPicture);
+      handleStateUpdated();
       save();
       return;
     }
@@ -233,9 +239,9 @@ export async function init() {
     }
 
     view.selectedPicture.size[0] = value;
+    handleSelect(view.selectedPicture);
     handleStateUpdated();
     save();
-    handleSelect(view.selectedPicture);
   });
 
   selectedPictureHeight.addEventListener('input', () => {
@@ -249,9 +255,9 @@ export async function init() {
     }
 
     view.selectedPicture.size[1] = value;
+    handleSelect(view.selectedPicture);
     handleStateUpdated();
     save();
-    handleSelect(view.selectedPicture);
   });
 
   selectedPictureDelete.addEventListener('click', () => {
@@ -276,7 +282,6 @@ export async function init() {
     } satisfies Picture;
 
     state.pictures.push(newPicture);
-    handleStateUpdated();
     handleSelect(newPicture);
     handleStateUpdated();
     save();
@@ -384,6 +389,7 @@ export async function init() {
 
     if (!picture) {
       handleSelect(null);
+      handleStateUpdated();
 
       panning = true;
       panOffset = [e.clientX, e.clientY];
